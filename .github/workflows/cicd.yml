@@ -33,7 +33,7 @@ jobs:
           port: ${{ secrets.SSH_PORT}}
           password: ${{ secrets.SSH_PASSWORD}}
           script: |
-            cd ~/se2/4/se2-backend-group-4
+            cd ~/se2/4/se2-backend
             git reset --hard origin/main
             git pull https://${{ secrets.CLONE_TOKEN}}@github.com/SoftwareEgnineering2-Assignment/se2-backend-group-4 main
             bash -ci 'npm install'
