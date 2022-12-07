@@ -22,7 +22,7 @@ jobs:
       - name: Run test
         run: npm test
   cd:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: ci
     if: github.ref == 'refs/heads/main'
     steps:
