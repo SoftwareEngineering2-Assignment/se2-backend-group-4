@@ -3,8 +3,9 @@ const mongoose = require('mongoose');
 const beautifyUnique = require('mongoose-beautiful-unique-validation');
 const {passwordDigest, comparePassword} = require('../utilities/authentication/helpers');
 
-mongoose.pluralize(null);
+mongoose.pluralize(null); //Don't pluralize collection name
 
+//mongoDB collection for dashboard
 const DashboardSchema = new mongoose.Schema(
   {
     name: {

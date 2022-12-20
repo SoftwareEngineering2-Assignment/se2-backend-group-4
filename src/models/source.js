@@ -2,8 +2,9 @@
 const mongoose = require('mongoose');
 const beautifyUnique = require('mongoose-beautiful-unique-validation');
 
-mongoose.pluralize(null);
+mongoose.pluralize(null); //Don't pluralize collection name
 
+//mongoDB collection for sources inside dashboard
 const SourceSchema = new mongoose.Schema(
   {
     name: {

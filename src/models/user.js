@@ -2,10 +2,11 @@
 const mongoose = require('mongoose');
 const beautifyUnique = require('mongoose-beautiful-unique-validation');
 const {passwordDigest, comparePassword} = require('../utilities/authentication/helpers');
-const {constants: {min}} = require('../utilities/validation');
+const {constants: {min}} = require('../utilities/validation'); //Minimum amount of characters for password
 
-mongoose.pluralize(null);
+mongoose.pluralize(null); //Don't pluralize collection name
 
+//mongoDB collection for user creation
 const UserSchema = new mongoose.Schema(
   {
     email: {
@@ -25,7 +26,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: [true, 'User password is required'],
       select: false,
-      minlength: min
+      minlength: min 
     },
     registrationDate: {type: Number}
   }
