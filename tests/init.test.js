@@ -60,30 +60,25 @@ test('GET /test-url returns false status  code', async (t) => {
 
 });
 
-//may add headers and params
+
 test('GET /test-url-request returns correct status code for get', async (t) => {
   const test_url = "https://se2-frontend-4.netlify.app/";
   const type = 'GET';
-  //const headers ='headers';
-  //const param = 'param';
 
   const {statusCode,body} = await t.context.got(`general/test-url-request?url=${test_url}&type=${type}`);
   t.is(statusCode, 200);
   t.is(body.status, 200);
-  console.log(statusCode,body)
 
 });
 
 test('GET /test-url-request returns correct status code for post', async (t) => {
   const test_url = "https://se2-frontend-4.netlify.app/";
   const type = 'POST';
-  //const headers ='headers';
-  //const param = 'param';
+
 
   const {statusCode,body} = await t.context.got(`general/test-url-request?url=${test_url}&type=${type}`);
   t.is(statusCode, 200);
   t.is(body.status, 500); //post without body
-  console.log(statusCode,body)
 
 });
 
@@ -95,7 +90,6 @@ test('GET /test-url-request returns correct status code for put', async (t) => {
   const {statusCode,body} = await t.context.got(`general/test-url-request?url=${test_url}&type=${type}`);
   t.is(statusCode, 200);
   t.is(body.status, 500);  //put without previous post
-  console.log(statusCode,body)
 
 });
 
@@ -107,6 +101,6 @@ test('GET /test-url-request returns false type', async (t) => {
   const {statusCode,body} = await t.context.got(`general/test-url-request?url=${test_url}&type=${type}`);
   t.is(statusCode, 200);
   t.is(body.status, 500);
-  //console.log(statusCode,body)
+  
 });
 
