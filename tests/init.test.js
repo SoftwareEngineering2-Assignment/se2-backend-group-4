@@ -20,7 +20,7 @@ test.after.always((t) => {
 });
 
 test('GET /statistics returns correct response and status code', async (t) => {
-  const {body, statusCode} = await t.context.got(`general/statistics`);
+  const {body, statusCode} = await t.context.got('general/statistics');
   //t.is(body.sources,1);
   //body,sources=0
   t.is(body.sources,0);
@@ -34,20 +34,18 @@ test('GET /sources returns correct response and status code', async (t) => {
   t.is(statusCode, 200);
 });
 
-
-
-
+//test that GET /general/test-url returns correct response and statusCode when correct url is given 
 test('GET /test-url returns correct  code', async (t) => {
 
-  const test_url = "https://se2-frontend-4.netlify.app/";
+  const correct_url = "https://se2-frontend-4.netlify.app/";
 
-  const { body, statusCode } = await t.context.got(`general/test-url?url=${test_url}`);
+  const { body, statusCode } = await t.context.got(`general/test-url?url=${correct_url}`);
   t.assert(body.active);
   t.is(statusCode, 200);
-  
 
 });
 
+//test that GET /general/test-url returns correct response when wrong url is given 
 test('GET /test-url returns false status  code', async (t) => {
 
   const wrong_url = "https://se2-end-4.netlify.app/";
@@ -60,7 +58,7 @@ test('GET /test-url returns false status  code', async (t) => {
 
 });
 
-
+//test that GET /general/test-url-request returns correct statusCode=200 and response when correct url is given and type=GET
 test('GET /test-url-request returns correct status code for get', async (t) => {
   const test_url = "https://se2-frontend-4.netlify.app/";
   const type = 'GET';
@@ -71,6 +69,7 @@ test('GET /test-url-request returns correct status code for get', async (t) => {
 
 });
 
+//test that GET /general/test-url-request returns correct statusCode=200 and response when correct url is given and type=POST
 test('GET /test-url-request returns correct status code for post', async (t) => {
   const test_url = "https://se2-frontend-4.netlify.app/";
   const type = 'POST';
@@ -82,6 +81,7 @@ test('GET /test-url-request returns correct status code for post', async (t) => 
 
 });
 
+//test that GET /general/test-url-request returns correct statusCode=200 and response when correct url is given and type=PUT
 test('GET /test-url-request returns correct status code for put', async (t) => {
   const test_url = "https://se2-frontend-4.netlify.app/";
   const type = 'PUT';
@@ -93,6 +93,7 @@ test('GET /test-url-request returns correct status code for put', async (t) => {
 
 });
 
+//test that GET /general/test-url-request returns correct statusCode=200 and response when correct url is given and wrong type
 test('GET /test-url-request returns false type', async (t) => {
   const test_url = "https://se2-frontend-4.netlify.app/";
   const type = 'PUSH'
