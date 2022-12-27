@@ -8,9 +8,6 @@ const test = require('ava').default;
 const got = require('got');
 const listen = require('test-listen');
 
-const sinon = require('sinon');
-
-
 const app = require('../src/index');
 const {jwtSign} = require('../src/utilities/authentication/helpers');
 const User = require('../src/models/user');
@@ -36,10 +33,10 @@ test.before(async (t) => {
   t.context.server = http.createServer(app);
   t.context.prefixUrl = await listen(t.context.server);
   t.context.got = got.extend({http2: true, throwHttpErrors: false, responseType: 'json', prefixUrl: t.context.prefixUrl});
-  user = await User.create({
+ user = await User.create({
       username: 'user',
       password: 'password',
-      email: 'email',
+     email: 'email',
     });
   });
 
