@@ -25,8 +25,8 @@ test('Create dashboard without name',async t => {
     t.is(dashboard.message,'dashboards validation failed: name: Dashboard name is required')
 });
 
-//test that a dashboard with name and password ca be created
-test('Create dashboard with name new password',async t => {
+//test that a dashboard with name and password can be created
+test('Create dashboard with name and password',async t => {
     mongoose();
     const dashboard =  await new Dashboard({name:'DashName',password:'password1'}).save();
     t.is(dashboard.name,'DashName');
