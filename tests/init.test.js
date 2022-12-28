@@ -31,7 +31,7 @@ test.before(async (t) => {
 
 test.after.always((t) => {
   t.context.server.close();
-  //dele test user, after test is over
+  //delete test user, after test is over
   User.findByIdAndDelete(user._id);
   //delete test dashboards created , after test is over
   Dashboard.deleteMany({}, 
