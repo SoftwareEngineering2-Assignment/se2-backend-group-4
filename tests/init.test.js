@@ -1135,7 +1135,7 @@ test('POST /check-sources returns correct response and status code when correct 
     createdAt:'',
   }).save();
 
-  const sourceBody={sources:source1,source2,source3} ; //POST body
+  const sourceBody={sources:[source1,source2,source3]} ; //POST body
   //send POST request with authenticated user's token in query , and id and name in body
   const {body, statusCode} = await t.context.got.post(`sources/check-sources?token=${token}`,{json:sourceBody});
   //check response
