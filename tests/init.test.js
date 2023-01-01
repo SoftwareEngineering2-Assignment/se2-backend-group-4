@@ -13,20 +13,9 @@ const {jwtSign} = require('../src/utilities/authentication/helpers');
 const User = require('../src/models/user');
 let user;
 
+
 const Dashboard = require('../src/models/dashboard');
-
-
-
-
-async function createDashboard(name='',layout,items,nextId='',password='',shared,owner=''){
-    try {
-        const dashboard = await new Dashboard({name,nextId,password,owner}).save();
-        return dashboard;
-    }
-    catch(e){
-        return Promise.reject(reason=e);
-    }
-}
+const Source = require('../src/models/source');
 
 
 test.before(async (t) => {
@@ -42,14 +31,28 @@ test.before(async (t) => {
 
 test.after.always((t) => {
   t.context.server.close();
+  //delete test user, after test is over
   User.findByIdAndDelete(user._id);
+  //delete test dashboards created , after test is over
+  Dashboard.deleteMany({}, 
+    function(err){
+      if(err) console.log(err);
+      console.log("Successful deletion");
+    });
+  //delete test sources created , after test is over
+  Source.deleteMany({}, 
+    function(err){
+      if(err) console.log(err);
+      console.log("Successful deletion");
+    });
 });
-
 
 
 test('GET /statistics returns correct response and status code', async (t) => {
   const {body, statusCode} = await t.context.got('general/statistics');
-  t.is(body.sources,0);
+
+  // t.is(body.sources,0); //Remove because we add sources during testing,so body.sources doesn't have a fixed value
+
   t.assert(body.success);
   t.is(statusCode, 200);
 });
@@ -171,11 +174,26 @@ test('GET /dashboards returns correct response and status code', async (t) => {
     mongoose();
     const token = jwtSign({id: user._id});
     //create new dashboard for user with name=Dashname
-    const dashboard1 =  await new Dashboard({name:'DashName',password:'password1'}).save();
-    const name = dashboard1.name ;
+    //const dashboard1 =  await new Dashboard({name:'DashName',password:'password1'}).save();
+    dashboard1 = await Dashboard({
+      name: 'DashName',
+      layout:[],
+      items:{},
+      nextId: 6,
+      password: 'password1',
+      shared: 0,
+      views: 15,
+      owner: user._id,
+      createdAt:'',
+    }).save();
+
+    const new_name = 'DiffDashName' ;  //dashboard name different from the existing one
+    const dashBody = {name:new_name};
     //send POST request with authenticated user's token in query and new dashboard name in body
-    const body = await t.context.got.post(`dashboards/create-dashboard?token=${token}`,{ json :{name}}).json();
+    const {body,statusCode} = await t.context.got.post(`dashboards/create-dashboard?token=${token}`,{json:dashBody});;
     //check response
+    t.is(statusCode,200);
+    console.log(body);
     t.assert(body.success);
 })
 
@@ -203,6 +221,7 @@ test('GET /dashboards returns correct response and status code', async (t) => {
     const {body} = await t.context.got.post(`dashboards/create-dashboard?token=${token}`,{ json :NewDash});
     //check response
     t.is(body.status, 409);   
+    t.is( body.message, 'A dashboard with that name already exists.');
 });
 
 //test that POST /delete-dashboard returns correct response when then given id doesn't belong to an existing dashboard
@@ -238,8 +257,9 @@ test('POST /delete-dashboard returns correct response when selected dashboard is
   
   const id = {id:dash._id}; //id of dashboard created above
   //send POST request with authenticated user's token in query and dashboard id in body
-  const {body} = await t.context.got.post(`dashboards/delete-dashboard?token=${token}`,{ json :id});
+  const {body,statusCode} = await t.context.got.post(`dashboards/delete-dashboard?token=${token}`,{ json :id});
   //check response
+  t.is(statusCode,200);
   t.assert(body.success);
 
 });
@@ -266,6 +286,7 @@ test('GET /dashboard returns correct response when selected dashboard exists', a
   //send GET request with authenticated user's token and dashboard's id in query
   const {body,statusCode} = await t.context.got(`dashboards/dashboard?token=${token}&id=${id}`);
   //check response
+  t.is(statusCode,200);
   t.assert(body.success);
 
 });
@@ -306,6 +327,7 @@ test('POST /save-dashboard returns correct response when selected dashboard exis
   //send POST request with authenticated user's token in query and dashboard id in body
   const {body,statusCode} = await t.context.got.post(`dashboards/save-dashboard?token=${token}`,{ json :id});
   //check response
+  t.is(statusCode,200);
   t.assert(body.success);
 
 });
@@ -348,6 +370,7 @@ test('POST /clone-dashboard returns correct response when dashboard clones succe
   const {body,statusCode} = await t.context.got.post(`dashboards/clone-dashboard?token=${token}`,{json:DashBody});
   
   //check response
+  t.is(statusCode,200);
   t.assert(body.success);
 
 });
@@ -386,7 +409,7 @@ test('POST /clone-dashboard returns correct response when dashboard with same na
   const DashBody = {dashboardId:dash1._id,name:'DashNameExisting'}; //Dashboard body with same name as the one created above
 
   //send POST request with authenticated user's token in query and dashboard id and new_name in body
-  const {body,statusCode} = await t.context.got.post(`dashboards/clone-dashboard?token=${token}`,{json:DashBody});
+  const {body} = await t.context.got.post(`dashboards/clone-dashboard?token=${token}`,{json:DashBody});
   //check response
   t.is(body.status, 409);
   t.is(body.message, 'A dashboard with that name already exists.');
@@ -415,7 +438,7 @@ test('POST /check-password-needed returns correct response when dashboard does n
   //post pody
   const DashBody = {user:user._id, dashboardId:wrong_dash_id}; 
  //send POST request with authenticated user's token in query , user id and wrond dashboard id in body
-  const {body,statusCode} = await t.context.got.post(`dashboards/check-password-needed?token=${token}`,{json:DashBody});
+  const {body} = await t.context.got.post(`dashboards/check-password-needed?token=${token}`,{json:DashBody});
   //check response
   t.is(body.status, 409);
   t.is(body.message, 'The specified dashboard has not been found.');
@@ -445,6 +468,7 @@ test('POST /check-password-needed returns correct response when owner wants to a
   //send POST request with authenticated user's token in query , owner id and correct dashboard id in body
   const {body,statusCode} = await t.context.got.post(`dashboards/check-password-needed?token=${token}`,{json:DashBody});
   //check response
+  t.is(statusCode,200);
   t.assert(body.success);
   t.is(body.owner, 'self');
 
@@ -473,6 +497,7 @@ test('POST /check-password-needed returns correct response when dashboard is not
   //send POST request with authenticated user's token in query , user id != owner id and existing dashboard id in body
   const {body,statusCode} = await t.context.got.post(`dashboards/check-password-needed?token=${token}`,{json:DashBody});
   //check response
+  t.is(statusCode,200);
   t.assert(body.success);
   t.is(body.owner, '');
   t.assert(!body.shared);
@@ -502,6 +527,7 @@ test('POST /check-password-needed returns correct response when dashboard shared
   //send POST request with authenticated user's token in query , user id != owner id and existing dashboard id in body
   const {body,statusCode} = await t.context.got.post(`dashboards/check-password-needed?token=${token}`,{json:DashBody});
   //check response
+  t.is(statusCode,200);
   t.assert(body.success);
   t.assert(body.shared);
   t.assert(!body.passwordNeeded);
@@ -530,6 +556,7 @@ test('POST /check-password-needed returns correct response when dashboard shared
   //send POST request with authenticated user's token in query , user id != owner id and existing dashboard id in body
   const {body,statusCode} = await t.context.got.post(`dashboards/check-password-needed?token=${token}`,{json:DashBody});
   //check response
+  t.is(statusCode,200);
   t.assert(body.success);
   t.is(body.owner, '');
   t.assert(body.shared);
@@ -557,7 +584,7 @@ test('POST /check-password returns correct response when dashboard does not exis
   const wrong_dash_id = '67ab17187c66d60ad82cf6cc'; //id not belonging to dashboard
   const DashBody = {dashboardId:wrong_dash_id , password:dash.password}; //POST body
   //send POST request with authenticated user's token in query , password and wrong dashboard id in body
-  const {body,statusCode} = await t.context.got.post(`dashboards/check-password?token=${token}`,{json:DashBody});
+  const {body} = await t.context.got.post(`dashboards/check-password?token=${token}`,{json:DashBody});
   //check response
   t.is(body.status, 409);
   t.is(body.message, 'The specified dashboard has not been found.');
@@ -587,6 +614,7 @@ test('POST /check-password returns correct response when given password is wrong
 //send POST request with authenticated user's token in query , wrong password and existing dashboard id in body
   const {body,statusCode} = await t.context.got.post(`dashboards/check-password?token=${token}`,{json:DashBody});
   //check response
+  t.is(statusCode,200);
   t.assert(body.success);
   t.assert(!body.correctPassword);
 
@@ -613,6 +641,7 @@ test('POST /check-password returns correct response when given password is corre
  //send POST request with authenticated user's token in query , correct password and existing dashboard id in body
   const {body,statusCode} = await t.context.got.post(`dashboards/check-password?token=${token}`,{json:DashBody});
   //check response
+  t.is(statusCode,200);
   t.assert(body.success);
   t.assert(body.correctPassword);
 
@@ -639,7 +668,7 @@ test('POST /share-dashboard returns correct response when dashboard does not exi
   const wrong_dash_id = '67ab17187c66d60ad82cf6cc'; //dashboard id that doesn't exist
   const DashBody = {dashboardId:wrong_dash_id}; //POST body
   //send POST request with authenticated user's token in query , non existing dashboard id in body
-  const {body,statusCode} = await t.context.got.post(`dashboards/share-dashboard?token=${token}`,{json:DashBody});
+  const {body} = await t.context.got.post(`dashboards/share-dashboard?token=${token}`,{json:DashBody});
   //check response
   t.is(body.status, 409);
   t.is(body.message, 'The specified dashboard has not been found.');
@@ -667,6 +696,7 @@ test('POST /share-dashboard returns correct response when shared successfully', 
   //send POST request with authenticated user's token in query , existing dashboard id in body
   const {body,statusCode} = await t.context.got.post(`dashboards/share-dashboard?token=${token}`,{json:DashBody});
   //check response
+  t.is(statusCode,200);
   t.assert(body.success);
   t.assert(body.shared);
 });
@@ -692,6 +722,7 @@ test('POST /share-dashboard returns correct response when dashboard stops being 
   //send POST request with authenticated user's token in query , existing dashboard id in body
   const {body,statusCode} = await t.context.got.post(`dashboards/share-dashboard?token=${token}`,{json:DashBody});
   //check response
+  t.is(statusCode,200);
   t.assert(body.success);
   t.assert(!body.shared);
 });
@@ -717,7 +748,7 @@ test('POST /change-password returns correct response when dashboard does not exi
   const wrong_dash_id = '67ab17187c66d60ad82cf6cc';////dashboard id that doesn't exist
   const DashBody = {dashboardId:wrong_dash_id,password:new_password}; //POST body
   //send POST request with authenticated user's token in query , new password and non existing dashboard id in body
-  const {body,statusCode} = await t.context.got.post(`dashboards/change-password?token=${token}`,{json:DashBody});
+  const {body} = await t.context.got.post(`dashboards/change-password?token=${token}`,{json:DashBody});
   //check response
   t.is(body.status, 409);
   t.is(body.message, 'The specified dashboard has not been found.');
@@ -744,7 +775,370 @@ test('POST /change-password returns correct response when dashboard password cha
   const new_password='123NewPassword' //new dashboard passwrod
   const DashBody = {dashboardId:dash._id,password:new_password}; //POST body
   //send POST request with authenticated user's token in query , valid new password and dashboard id in body
-  const {body,statusCode} = await t.context.got.post(`dashboards/change-password?token=${token}`,{json:DashBody});
+  const {body} = await t.context.got.post(`dashboards/change-password?token=${token}`,{json:DashBody});
   //check response
+  t.assert(body.success);
+});
+
+
+//test that GET /sources returns correct statusCode=200 and body given an authenticated user
+test('GET /sources returns correct response and status code for authenticated user ', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test source for the authenticated user
+  source = await Source({
+    name:'source1',
+    type: '',
+    url:'',
+    login:'',
+    passcode:'',
+    vhost: '',
+    owner: user._id,
+    createdAt:'',
+  }).save();
+
+  //send GET request with authenticated user's token in query
+  const {body, statusCode} = await t.context.got(`sources/sources?token=${token}`);
+  //check response
+  t.is(statusCode,200);
+  t.assert(body.success);
+});
+
+//test that GET /sources returns correct response given an wrong user authentication
+test('GET /sources returns correct response and status code for wrong user authentication ', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test source for the authenticated user
+  source = await Source({
+    name:'source1',
+    type: '',
+    url:'',
+    login:'',
+    passcode:'',
+    vhost: '',
+    owner: user._id,
+    createdAt:'',
+  }).save();
+
+  const wrong_token ='63ac2df45d195c3c6c93c338'; //wrong authentication token
+  //send GET request with wrong user's token in query
+  const {body} = await t.context.got(`sources/sources?token=${wrong_token}`);
+  //check response
+  t.is(body.status,403);
+  t.is(body.message,'Authorization Error: Failed to verify token.');
+});
+
+
+//test that POST /sources returns correct response given an authenticated user and a source with a name that already exists
+test('POST /create-source returns correct response and status code when trying to create a new source with a name that already exists ', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test source for the authenticated user
+  source = await Source({
+    name:'sourceName',
+    type: '',
+    url:'',
+    login:'',
+    passcode:'',
+    vhost: '',
+    owner: user._id,
+    createdAt:'',
+  }).save();
+
+  const newName = 'sourceName' ; //new source name same as existing one
+  const sourceBody={name:newName} ;
+  //send POST request with authenticated user's token in query , and new source name in body
+  const {body} = await t.context.got.post(`sources/create-source?token=${token}`,{json:sourceBody});
+  //check response
+  t.is(body.status,409);
+  t.is(body.message,'A source with that name already exists.');
+});
+
+//test that POST /sources returns correct statusCode=200 and body given an authenticated user and a valid new source name
+test('POST /create-source returns correct response and status code when successfully creates a new source ', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test source for the authenticated user
+  source = await Source({
+    name:'sourceName',
+    type: '',
+    url:'',
+    login:'',
+    passcode:'',
+    vhost: '',
+    owner: user._id,
+    createdAt:'',
+  }).save();
+
+  const newName = 'DifferentsourceName' ; //new source name same as existing one
+  const sourceBody={name:newName} ;
+  //send POST request with authenticated user's token in query , and new source name in body
+  const {body, statusCode} = await t.context.got.post(`sources/create-source?token=${token}`,{json:sourceBody});
+  //check response
+  t.is(statusCode,200);
+  t.assert(body.success);
+});
+
+//test that POST /sources returns correct response when error is caught.Example wrong user authentiation token
+test('POST /create-source returns correct response and status code when error is caught ', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test source for the authenticated user
+  source = await Source({
+    name:'sourceName',
+    type: '',
+    url:'',
+    login:'',
+    passcode:'',
+    vhost: '',
+    owner: user._id,
+    createdAt:'',
+  }).save();
+
+  const wrong_token ='63ac2df45d195c3c6c93c338'; //wrong authentication token
+  const newName = 'DifferentsourceName' ; //new source name same as existing one
+  const sourceBody={name:newName} ;
+  //send POST request with wrong user's token in query , and new source name in body
+  const {body} = await t.context.got.post(`sources/create-source?token=${wrong_token}`,{json:sourceBody});
+  //check response
+  t.is(body.status,403);
+  t.is(body.message,'Authorization Error: Failed to verify token.');
+});
+
+//test that POST /change-source returns correct response given a source id that doesnt belong to an existing source
+test('POST /change-source returns correct response and status code when wrong source id is given ', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test source for the authenticated user
+  source = await Source({
+    name:'sourceName',
+    type: '',
+    url:'',
+    login:'',
+    passcode:'',
+    vhost: '',
+    owner: user._id,
+    createdAt:'',
+  }).save();
+
+  const source_id ='63ac3989dd4ed355bcb8c991'; //non existing source id
+  const sourceBody={id:source_id} ; //POST body
+  //send POST request with authenticated user's token in query , and non existing source id in body
+  const {body} = await t.context.got.post(`sources/change-source?token=${token}`,{json:sourceBody});
+  //check response
+  t.is(body.status,409);
+  t.is(body.message,'The selected source has not been found.');
+});
+
+//test that POST /change-source returns correct response when trying to change source name to an existing one
+test('POST /change-source returns correct response and status code when correct source id and existing name are given  ', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test sources for the authenticated user
+  source1 = await Source({
+    name:'sourceName1',
+    type: '',
+    url:'',
+    login:'',
+    passcode:'',
+    vhost: '',
+    owner: user._id,
+    createdAt:'',
+  }).save();
+
+  source2 = await Source({
+    name:'sourceName2',
+    type: '',
+    url:'',
+    login:'',
+    passcode:'',
+    vhost: '',
+    owner: user._id,
+    createdAt:'',
+  }).save();
+  //Try to change name of source1 to that of source2
+  const source_id =source1._id; //id of source1 
+  const new_name = source2.name; //id of source2
+  const sourceBody={id:source_id , name:new_name} ; //POST body
+  //send POST request with authenticated user's token in query , and id and new name in body
+  const {body} = await t.context.got.post(`sources/change-source?token=${token}`,{json:sourceBody});
+  //check response
+  t.is(body.status,409);
+  t.is(body.message,'A source with the same name has been found.');
+});
+
+
+//test that POST /change-source returns correct statusCode=200 and body when valid source id and new name are given
+test('POST /change-source returns correct response and status code when correct source id and name are given  ', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test sources for the authenticated user
+  source = await Source({
+    name:'sourceName1',
+    type: '',
+    url:'',
+    login:'',
+    passcode:'',
+    vhost: '',
+    owner: user._id,
+    createdAt:'',
+  }).save();
+
+ 
+  //Try to change name of source1 to that of source2
+
+  const source_id =source._id; //id of source1 
+  const new_name = 'NewSourceName'; //id of source2
+  const sourceBody={id:source_id , name:new_name} ; //POST body
+  //send POST request with authenticated user's token in query , and id and name in body
+  const {body, statusCode} = await t.context.got.post(`sources/change-source?token=${token}`,{json:sourceBody});
+  //check response
+  t.is(statusCode,200);
+  t.assert(body.success);
+});
+
+//test POST /delete-source returns correct response, given a source id that doesnt belong to an existing source
+test('POST /delete-source returns correct response and status code when wrong source id is given ', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test source for the authenticated user
+  source = await Source({
+    name:'sourceToDel',
+    type: '',
+    url:'',
+    login:'',
+    passcode:'',
+    vhost: '',
+    owner: user._id,
+    createdAt:'',
+  }).save();
+
+  const source_id ='63ac3989dd4ed355bcb8c991'; //non existing source id
+  const sourceBody={id:source_id} ; //POST body
+  //send POST request with authenticated user's token in query , and non existing source id in body
+  const {body} = await t.context.got.post(`sources/delete-source?token=${token}`,{json:sourceBody});
+  //check response
+  t.is(body.status,409);
+  t.is(body.message,'The selected source has not been found.');
+});
+
+//test POST /delete-source returns correct statusCode=200 and body given valid source id
+test('POST /delete-source returns correct response and status code when source is deleted successfully ', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test source for the authenticated user
+  source = await Source({
+    name:'sourceToDel',
+    type: '',
+    url:'',
+    login:'',
+    passcode:'',
+    vhost: '',
+    owner: user._id,
+    createdAt:'',
+  }).save();
+
+  const source_id =source._id; //source id to delete
+  const sourceBody={id:source_id} ; //POST body
+  //send POST request with authenticated user's token in query , and source id in body
+  const {body, statusCode} = await t.context.got.post(`sources/delete-source?token=${token}`,{json:sourceBody});
+  //check response
+  t.is(statusCode,200);
+  t.assert(body.success);
+});
+
+//test POST /source returns correct response, given a source name that doesnt belong to an existing source of the user
+test('POST /source returns correct response and status code when wrong source name is given ', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test source for the authenticated user
+  source = await Source({
+    name:'sourceName',
+    type: '',
+    url:'',
+    login:'',
+    passcode:'',
+    vhost: '',
+    owner: user._id,
+    createdAt:'',
+  }).save();
+
+  const source_name ='sourceWrongName'; //non existing source name
+  const sourceBody={name:source_name , user:source.owner , user:user._id } ; //POST body
+  //send POST request with authenticated user's token in query , and wrong source name in body
+  const {body} = await t.context.got.post(`sources/source?token=${token}`,{json:sourceBody});
+  //check response
+  t.is(body.status,409);
+  t.is(body.message,'The selected source has not been found.');
+});
+
+
+//test POST /source returns correct response,when given a valid name 
+test('POST /source returns correct response and status code when existing source name is given ', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test source for the authenticated user
+  source = await Source({
+    name:'sourceName',
+    type: '',
+    url:'',
+    login:'',
+    passcode:'',
+    vhost: '',
+    owner: user._id,
+    createdAt:'',
+  }).save();
+
+  const sourceBody={name:'sourceName' , owner:source.owner , user:user._id } ; //POST body
+  //send POST request with authenticated user's token in query , and name ,owner_id user_id in body
+  const {body, statusCode} = await t.context.got.post(`sources/source?token=${token}`,{json:sourceBody});
+  //check response
+  t.is(statusCode,200);
+  t.assert(body.success);
+});
+
+//test that POST /check-sources returns correct response when trying to change source name to an existing one
+test('POST /check-sources returns correct response and status code when correct source id and existing name are given  ', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test sources for the authenticated user
+  source1 = await Source({
+    name:'sourceName1',
+    type: '',
+    url:'',
+    login:'',
+    passcode:'',
+    vhost: '',
+    owner: user._id,
+    createdAt:'',
+  }).save();
+
+  source2 = await Source({
+    name:'sourceName2',
+    type: '',
+    url:'',
+    login:'',
+    passcode:'',
+    vhost: '',
+    owner: user._id,
+    createdAt:'',
+  }).save();
+
+  source3 = await Source({
+    name:'sourceName3',
+    type: '',
+    url:'',
+    login:'',
+    passcode:'',
+    vhost: '',
+    owner: user._id,
+    createdAt:'',
+  }).save();
+
+  const sourceBody={sources:[source1,source2,source3]} ; //POST body
+  //send POST request with authenticated user's token in query , and id and name in body
+  const {body, statusCode} = await t.context.got.post(`sources/check-sources?token=${token}`,{json:sourceBody});
+  //check response
+  t.is(statusCode,200);
   t.assert(body.success);
 });
