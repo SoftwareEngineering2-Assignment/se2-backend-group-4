@@ -182,3 +182,35 @@ test('POST /authenticate returns correct response username and password match', 
     t.is(body.user.username,user.username);
     t.is(body.user.email,user.email);
   });
+
+ //test that POST /user/resetpassword returns correct response when a user with the given username was not found
+test('POST /resetpassword returns correct response and status code when trying to reset password with wrong username', async (t) => {
+  mongoose();
+  const wrongUsename = 'WrongUsername'
+  const UserBody={username : wrongUsename} ;
+  //send POST request with username  in body
+  const {body} = await t.context.got.post(`users/resetpassword?`,{json:UserBody});
+  //check response
+  t.is(body.status,404);
+  t.is(body.message,'Resource Error: User not found.');
+});
+
+ //test that POST /user/resetpassword returns correct response and statuscode=200 when email to change password is sent seccessfully
+ test('POST /resetpassword returns correct response and status code given a valis username', async (t) => {
+  mongoose();
+  //Create test user
+  user = await User({
+      email: 'User1@gmail.com',
+      username: 'User1',
+      password: '13434UserExists',
+  }).save();
+
+  const UserBody={username : user.username} ;
+  //send POST request with username  in body
+  const {body,statusCode} = await t.context.got.post(`users/resetpassword?`,{json:UserBody});
+  //check response
+  t.assert(body.ok);
+  t.is(statusCode,200);
+  t.is(body.message,'Forgot password e-mail sent.');
+});
+
