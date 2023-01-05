@@ -2,7 +2,7 @@
 require('dotenv').config();
 const db_connect = require('../src/config/mongoose.js');
 const {mongoose} = require('../src/config');
-
+const { ObjectId } = require('mongodb');
 const http = require('node:http');
 const test = require('ava').default;
 const got = require('got');
@@ -212,5 +212,48 @@ test('POST /resetpassword returns correct response and status code when trying t
   t.assert(body.ok);
   t.is(statusCode,200);
   t.is(body.message,'Forgot password e-mail sent.');
+});
+
+//test that POST /user/changepassword returns correct response when a user with the given username does not match authentication token
+test('POST /changepassword returns correct response and status code when trying to reset password with wrong username', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id}); //authenticated user
+
+  const UserBody={password : 'NewPass123'} ; //post body with wrond username and new password
+  //send POST request with authentication token in query and username and new password in body
+  const {body} = await t.context.got.post(`users/changepassword?token=${token}`,{json:UserBody});
+  //check response
+  console.log(body)
+  t.is(body.status,404);
+  t.is(body.message,'Resource Error: User not found.');
+});
+
+ //test that POST /user/changepassword returns correct response when username matches authentication token
+ test('POST /changepassword returns correct response and status code when password changes successfull', async (t) => {
+  mongoose();
+  //Create existing test user
+  const usertest = await new User({
+    username: 'usertest',
+    password: 'passwordtest',
+   email: 'emailtest@gmail.com',
+  }).save();
+
+
+  const token = jwtSign({id: usertest.id}); //authenticated user
+  const usrname = usertest.name ;
+  const UserBody={username :usertest.name ,  password : 'NewPass123'} ; //post body with wrong username and new password
+  console.log(UserBody);
+  console.log(user.username,usertest._id,user._id,user.id,token)
+  const names = usertest.name ; 
+  const userer = await User.findOne({'63b472979f8d5c29e03b84f0'});
+  console.log(userer)
+  const userer2 = await User.find({username: 'usertest'});
+  console.log(userer2)
+  //send POST request with authentication token in query and username and new password in body
+  const {body} = await t.context.got.post(`users/changepassword?token=${token}`,{json:UserBody});
+  //check response
+  console.log(body)
+  t.is(body.status,404);
+  t.is(body.message,'Resource Error: User not found.');
 });
 
