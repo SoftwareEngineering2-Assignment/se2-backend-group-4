@@ -1,13 +1,10 @@
 /* eslint-disable import/no-unresolved */
 require('dotenv').config();
-const db_connect = require('../src/config/mongoose.js');
-const {mongoose} = require('../src/config');
 
 const http = require('node:http');
 const test = require('ava').default;
 const got = require('got');
 const listen = require('test-listen');
-
 const app = require('../src/index');
 const {jwtSign} = require('../src/utilities/authentication/helpers');
 

@@ -1,17 +1,13 @@
 /* eslint-disable import/no-unresolved */
 require('dotenv').config();
-const db_connect = require('../src/config/mongoose.js');
 const {mongoose} = require('../src/config');
-
 const http = require('node:http');
 const test = require('ava').default;
 const got = require('got');
 const listen = require('test-listen');
-
 const app = require('../src/index');
 const {jwtSign} = require('../src/utilities/authentication/helpers');
 const User = require('../src/models/user');
-let user;
 const Source = require('../src/models/source');
 
 
@@ -19,11 +15,11 @@ test.before(async (t) => {
   t.context.server = http.createServer(app);
   t.context.prefixUrl = await listen(t.context.server);
   t.context.got = got.extend({http2: true, throwHttpErrors: false, responseType: 'json', prefixUrl: t.context.prefixUrl});
- user = await User.create({
-      username: 'user',
-      password: 'password',
-     email: 'email',
-    });
+  user = await User.create({
+    username: 'user',
+    password: 'password',
+   email: 'email',
+  });
   });
 
 test.after.always((t) => {
