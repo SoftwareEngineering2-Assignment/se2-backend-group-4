@@ -1,13 +1,10 @@
 /* eslint-disable import/no-unresolved */
 require('dotenv').config();
-const db_connect = require('../src/config/mongoose.js');
 const {mongoose} = require('../src/config');
-
 const http = require('node:http');
 const test = require('ava').default;
 const got = require('got');
 const listen = require('test-listen');
-
 const app = require('../src/index');
 const {jwtSign} = require('../src/utilities/authentication/helpers');
 const User = require('../src/models/user');
@@ -216,7 +213,7 @@ test('POST /change-source returns correct response and status code when correct 
   }).save();
   //Try to change name of source1 to that of source2
   const source_id =source1._id; //id of source1 
-  const new_name = source2.name; //id of source2
+  const new_name = source2.name; //new name of source1
   const sourceBody={id:source_id , name:new_name} ; //POST body
   //send POST request with authenticated user's token in query , and id and new name in body
   const {body} = await t.context.got.post(`sources/change-source?token=${token}`,{json:sourceBody});
@@ -355,42 +352,38 @@ test('POST /source returns correct response and status code when existing source
   t.assert(body.success);
 });
 
-//test that POST /check-sources returns correct response when trying to change source name to an existing one
-test('POST /check-sources returns correct response and status code when correct source id and existing name are given  ', async (t) => {
+//test that POST /check-sources returns correct response when check is successful
+test('POST sources/check-sources returns correct response and status code', async (t) => {
   mongoose();
   const token = jwtSign({id: user._id});
   //Create test sources for the authenticated user
   source1 = await Source({
-    name:'sourceName1',
+    name:'source1',
     type: '',
     url:'',
     login:'',
     passcode:'',
     vhost: '',
     owner: user._id,
-    createdAt:'',
   }).save();
 
   source2 = await Source({
-    name:'sourceName2',
+    name:'source2',
     type: '',
     url:'',
     login:'',
-    passcode:'',
     vhost: '',
     owner: user._id,
-    createdAt:'',
   }).save();
 
   source3 = await Source({
-    name:'sourceName3',
+    name:'source3',
     type: '',
     url:'',
     login:'',
     passcode:'',
     vhost: '',
     owner: user._id,
-    createdAt:'',
   }).save();
 
   const sourceBody={sources:[source1,source2,source3]} ; //POST body
