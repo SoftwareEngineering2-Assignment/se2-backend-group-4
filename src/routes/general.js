@@ -3,10 +3,10 @@ const express = require('express');
 const got = require('got');
 
 const router = express.Router();
-
 const User = require('../models/user');
 const Dashboard = require('../models/dashboard');
 const Source = require('../models/source');
+
 
 router.get('/statistics',
   async (req, res, next) => {
@@ -64,6 +64,21 @@ router.get('/test-url-request',
 
       let statusCode;
       let body;
+      const actions = {
+        GET: _ => got(url, {
+          headers: headers ? JSON.parse(headers) : {},
+          searchParams: params ? JSON.parse(params) : {}
+        }),
+        POST: _ => got.post(url, {
+          headers: headers ? JSON.parse(headers) : {},
+          json: requestBody ? JSON.parse(requestBody) : {}
+        }),
+        PUT: _ => got.put(url, {
+          headers: headers ? JSON.parse(headers) : {},
+          json: requestBody ? JSON.parse(requestBody) : {}
+        })
+    };
+    /*
       switch (type) {
         case 'GET':
           ({statusCode, body} = await got(url, {
@@ -72,10 +87,7 @@ router.get('/test-url-request',
           }));
           break;
         case 'POST':
-          ({statusCode, body} = await got.post(url, {
-            headers: headers ? JSON.parse(headers) : {},
-            json: requestBody ? JSON.parse(requestBody) : {}
-          }));
+          ({statusCode, body} = await asyncCall(url, headers, requestBody) );
           break;
         case 'PUT':
           ({statusCode, body} = await got.put(url, {
@@ -87,7 +99,14 @@ router.get('/test-url-request',
           statusCode = 500;
           body = 'Something went wrong';
       }
-      
+     */
+    
+      if(actions.hasOwnProperty(type)) {
+        ({statusCode, body} = await actions[type]());
+    } else {
+      statusCode = 500;
+      body = 'Something went wrong';
+    }
       return res.json({
         status: statusCode,
         response: body,
