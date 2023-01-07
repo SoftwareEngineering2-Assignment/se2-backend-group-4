@@ -40,15 +40,7 @@ test('GET /sources returns correct response and status code for authenticated us
   mongoose();
   const token = jwtSign({id: user._id});
   //Create test source for the authenticated user
-  source = await Source({
-    name:'source1',
-    type: '',
-    url:'',
-    login:'',
-    passcode:'',
-    vhost: '',
-    owner: user._id,
-    createdAt:'',
+  source = await Source({name:'source1',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
   }).save();
 
   //send GET request with authenticated user's token in query
@@ -63,15 +55,7 @@ test('GET /sources returns correct response and status code for wrong user authe
   mongoose();
   const token = jwtSign({id: user._id});
   //Create test source for the authenticated user
-  source = await Source({
-    name:'source1',
-    type: '',
-    url:'',
-    login:'',
-    passcode:'',
-    vhost: '',
-    owner: user._id,
-    createdAt:'',
+  source = await Source({name:'source1',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
   }).save();
 
   const wrong_token ='63ac2df45d195c3c6c93c338'; //wrong authentication token
@@ -88,15 +72,7 @@ test('POST /create-source returns correct response and status code when trying t
   mongoose();
   const token = jwtSign({id: user._id});
   //Create test source for the authenticated user
-  source = await Source({
-    name:'sourceName',
-    type: '',
-    url:'',
-    login:'',
-    passcode:'',
-    vhost: '',
-    owner: user._id,
-    createdAt:'',
+  source = await Source({name:'sourceName',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
   }).save();
 
   const newName = 'sourceName' ; //new source name same as existing one
@@ -113,15 +89,7 @@ test('POST /create-source returns correct response and status code when successf
   mongoose();
   const token = jwtSign({id: user._id});
   //Create test source for the authenticated user
-  source = await Source({
-    name:'sourceName',
-    type: '',
-    url:'',
-    login:'',
-    passcode:'',
-    vhost: '',
-    owner: user._id,
-    createdAt:'',
+  source = await Source({name:'sourceName',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
   }).save();
 
   const newName = 'DifferentsourceName' ; //new source name same as existing one
@@ -138,15 +106,7 @@ test('POST /create-source returns correct response and status code when error is
   mongoose();
   const token = jwtSign({id: user._id});
   //Create test source for the authenticated user
-  source = await Source({
-    name:'sourceName',
-    type: '',
-    url:'',
-    login:'',
-    passcode:'',
-    vhost: '',
-    owner: user._id,
-    createdAt:'',
+  source = await Source({name:'sourceName',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
   }).save();
 
   const wrong_token ='63ac2df45d195c3c6c93c338'; //wrong authentication token
@@ -164,15 +124,7 @@ test('POST /change-source returns correct response and status code when wrong so
   mongoose();
   const token = jwtSign({id: user._id});
   //Create test source for the authenticated user
-  source = await Source({
-    name:'sourceName',
-    type: '',
-    url:'',
-    login:'',
-    passcode:'',
-    vhost: '',
-    owner: user._id,
-    createdAt:'',
+  source = await Source({name:'sourceName',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
   }).save();
 
   const source_id ='63ac3989dd4ed355bcb8c991'; //non existing source id
@@ -189,26 +141,10 @@ test('POST /change-source returns correct response and status code when correct 
   mongoose();
   const token = jwtSign({id: user._id});
   //Create test sources for the authenticated user
-  source1 = await Source({
-    name:'sourceName1',
-    type: '',
-    url:'',
-    login:'',
-    passcode:'',
-    vhost: '',
-    owner: user._id,
-    createdAt:'',
+  source1 = await Source({name:'sourceName1',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
   }).save();
 
-  source2 = await Source({
-    name:'sourceName2',
-    type: '',
-    url:'',
-    login:'',
-    passcode:'',
-    vhost: '',
-    owner: user._id,
-    createdAt:'',
+  source2 = await Source({name:'sourceName2',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
   }).save();
   //Try to change name of source1 to that of source2
   const source_id =source1._id; //id of source1 
@@ -227,15 +163,7 @@ test('POST /change-source returns correct response and status code when correct 
   mongoose();
   const token = jwtSign({id: user._id});
   //Create test sources for the authenticated user
-  source = await Source({
-    name:'sourceName1',
-    type: '',
-    url:'',
-    login:'',
-    passcode:'',
-    vhost: '',
-    owner: user._id,
-    createdAt:'',
+  source = await Source({name:'sourceName1',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
   }).save();
 
  
@@ -256,15 +184,7 @@ test('POST /delete-source returns correct response and status code when wrong so
   mongoose();
   const token = jwtSign({id: user._id});
   //Create test source for the authenticated user
-  source = await Source({
-    name:'sourceToDel',
-    type: '',
-    url:'',
-    login:'',
-    passcode:'',
-    vhost: '',
-    owner: user._id,
-    createdAt:'',
+  source = await Source({name:'sourceToDel',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
   }).save();
 
   const source_id ='63ac3989dd4ed355bcb8c991'; //non existing source id
@@ -281,15 +201,7 @@ test('POST /delete-source returns correct response and status code when source i
   mongoose();
   const token = jwtSign({id: user._id});
   //Create test source for the authenticated user
-  source = await Source({
-    name:'sourceToDel',
-    type: '',
-    url:'',
-    login:'',
-    passcode:'',
-    vhost: '',
-    owner: user._id,
-    createdAt:'',
+  source = await Source({name:'sourceToDel',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
   }).save();
 
   const source_id =source._id; //source id to delete
@@ -306,15 +218,7 @@ test('POST /source returns correct response and status code when wrong source na
   mongoose();
   const token = jwtSign({id: user._id});
   //Create test source for the authenticated user
-  source = await Source({
-    name:'sourceName',
-    type: '',
-    url:'',
-    login:'',
-    passcode:'',
-    vhost: '',
-    owner: user._id,
-    createdAt:'',
+  source = await Source({name:'sourceName',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
   }).save();
 
   const source_name ='sourceWrongName'; //non existing source name
@@ -332,15 +236,7 @@ test('POST /source returns correct response and status code when existing source
   mongoose();
   const token = jwtSign({id: user._id});
   //Create test source for the authenticated user
-  source = await Source({
-    name:'sourceName',
-    type: '',
-    url:'',
-    login:'',
-    passcode:'',
-    vhost: '',
-    owner: user._id,
-    createdAt:'',
+  source = await Source({name:'sourceName',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
   }).save();
 
   const sourceBody={name:'sourceName' , owner:source.owner , user:user._id } ; //POST body
@@ -356,37 +252,13 @@ test('POST /check-sources returns correct response and status code when correct 
   mongoose();
   const token = jwtSign({id: user._id});
   //Create test sources for the authenticated user
-  source1 = await Source({
-    name:'sourceName1',
-    type: '',
-    url:'',
-    login:'',
-    passcode:'',
-    vhost: '',
-    owner: user._id,
-    createdAt:'',
+  source1 = await Source({name:'sourceName1',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
   }).save();
 
-  source2 = await Source({
-    name:'sourceName2',
-    type: '',
-    url:'',
-    login:'',
-    passcode:'',
-    vhost: '',
-    owner: user._id,
-    createdAt:'',
+  source2 = await Source({name:'sourceName2',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
   }).save();
 
-  source3 = await Source({
-    name:'sourceName3',
-    type: '',
-    url:'',
-    login:'',
-    passcode:'',
-    vhost: '',
-    owner: user._id,
-    createdAt:'',
+  source3 = await Source({name:'sourceName3',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
   }).save();
 
   const sourceBody={sources:[source1,source2,source3]} ; //POST body
