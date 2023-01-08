@@ -9,6 +9,7 @@ const router = express.Router();
 const User = require('../models/user');
 const Reset = require('../models/reset');
 
+
 router.post('/create',
   (req, res, next) => validation(req, res, next, 'register'),
   async (req, res, next) => {
@@ -108,6 +109,7 @@ router.post('/changepassword',
         });
       }
       const reset = await Reset.findOneAndRemove({username});
+      console.log(reset)
       if (!reset) {
         return res.json({
           status: 410,

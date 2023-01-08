@@ -21,6 +21,7 @@ test('Create Source without a name',async t => {
     mongoose();
     const source =  await t.throwsAsync(createSource());
     t.is(source.message,'sources validation failed: name: Source name is required')
+    Source.deleteOne({});
 });
 
 //test that source can't be created without name
@@ -28,4 +29,5 @@ test('Create Source with a name',async t => {
     mongoose();
     const source =  await new Source({name:'SourceName'});
     t.is(source.name,'SourceName');
+    Source.deleteOne({});
 });
