@@ -179,16 +179,47 @@ test('POST /resetpassword returns correct response and status code when trying t
   t.is(body.message,'Forgot password e-mail sent.');
 });
 
- //test that POST /user/resetpassword returns correct response and statuscode=200 when email to change password is sent seccessfully
- test('POST /changepassword returns correct response and status code given a valid username', async (t) => {
+ //test that POST /user/resetpassword returns statusCode=200 when password changes successfully
+ test('POST /changepassword returns correct response and status code when password changes successfully', async (t) => {
   mongoose();
   const token = jwtSign({username : user.username});
-  const UserBody={password: 'NewPass123'} ;
-  //send POST request with username  in body
+  const UserBody={password: 'NewPass12'} ;
+  //send POST request with new password in body
   const {body,statusCode} = await t.context.got.post(`users/changepassword?token=${token}`,{json:UserBody});
   //check response
-  console.log(body)
   t.assert(body.ok);
   t.is(statusCode,200);
   t.is(body.message,'Password was changed.');
 });
+
+  //test that POST /user/resetpassword returns statusCode=404 and Resource Error message when username is wrong
+  test('POST /changepassword returns correct response and status code when user is not found', async (t) => {
+    mongoose();
+    const token = jwtSign({username : 'WrongUserName'});
+    const UserBody={password: 'NewPass123'} ;
+    //send POST request with new password in body
+    const {body} = await t.context.got.post(`users/changepassword?token=${token}`,{json:UserBody});
+    //check response
+    t.is(body.status,404);
+    t.is(body.message,'Resource Error: User not found.');
+  });
+
+  //test that POST /user/changepassword returns statusCode=410 and Resource Error message when token has expired
+  test('POST /changepassword returns correct response and status code when username token has expired', async (t) => {
+    mongoose();
+    const token = jwtSign({username: user.username}); //authenticate user
+  
+    // Stub the clock with sinon:
+    const clock = sinon.useFakeTimers();
+    // Move clock forward by 1 hour 
+    await clock.tickAsync(3600000);
+  
+    const UserBody={password : 'NewPass1234'} ; //post body with new password
+    //send POST request with authentication token in query and new password in body
+    const {body} = await t.context.got.post(`users/changepassword?token=${token}`,{json:UserBody});
+    //check response
+    t.is(body.status , 410);
+    t.is(body.message,' Resource Error: Reset token has expired.');
+     // Restore current clock for other tests:
+     clock.restore();
+  });
