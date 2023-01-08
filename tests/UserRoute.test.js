@@ -179,4 +179,16 @@ test('POST /resetpassword returns correct response and status code when trying t
   t.is(body.message,'Forgot password e-mail sent.');
 });
 
-
+ //test that POST /user/resetpassword returns correct response and statuscode=200 when email to change password is sent seccessfully
+ test('POST /changepassword returns correct response and status code given a valid username', async (t) => {
+  mongoose();
+  const token = jwtSign({username : user.username});
+  const UserBody={password: 'NewPass123'} ;
+  //send POST request with username  in body
+  const {body,statusCode} = await t.context.got.post(`users/changepassword?token=${token}`,{json:UserBody});
+  //check response
+  console.log(body)
+  t.assert(body.ok);
+  t.is(statusCode,200);
+  t.is(body.message,'Password was changed.');
+});
