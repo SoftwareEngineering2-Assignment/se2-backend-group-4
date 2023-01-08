@@ -8,7 +8,9 @@ const listen = require('test-listen');
 const app = require('../src/index');
 const {jwtSign} = require('../src/utilities/authentication/helpers');
 const User = require('../src/models/user');
+const sinon = require('sinon');
 let user;
+
 
 test.before(async (t) => {
   t.context.server = http.createServer(app);
@@ -123,7 +125,7 @@ test('POST /authenticate returns correct response when username is wrong', async
   });
 
 //test that POST /user/authenticate returns statusCode=401 and Authentication Error message when password doenst match username
-test('POST /authenticate returns correct response when users snters wrong password', async (t) => {
+test('POST /authenticate returns correct response when user enters wrong password', async (t) => {
     mongoose();
     //Create existing test user
     user = await User({email: 'User1@gmail.com',username: 'User1',password: 'CorrectPassword',}).save();
@@ -176,3 +178,48 @@ test('POST /resetpassword returns correct response and status code when trying t
   t.is(body.message,'Forgot password e-mail sent.');
 });
 
+//test that POST /user/changepassword returns correct response and message when username matches authentication token
+test('POST /changepassword returns correct response and status code when password changes successfull', async (t) => {
+  mongoose();
+  const token = jwtSign({username: user.username}); //authenticate user
+  const UserBody={password : 'NewPass12'} ; //post body with new password
+  //send POST request with authentication token in query and new password in body
+  const {body,statusCode} = await t.context.got.post(`users/changepassword?token=${token}`,{json:UserBody});
+  //check response
+  t.is(statusCode,200);
+  t.assert(body.ok);
+  t.is(body.message,'Password was changed.');
+});
+
+ //test that POST /user/changepassword returns statusCode=404 and Resource Error message when a user with the given username does not match authentication token
+ test('POST /changepassword returns correct response and status code when trying to reset password with wrong username', async (t) => {
+  mongoose();
+  const WrongUsername = 'NameNotExisting' ;
+  const token = jwtSign({username: WrongUsername}); //authenticate user
+  const UserBody={password : 'NewPass123'} ; //post body with new password
+  //send POST request with authentication token in query and new password in body
+  const {body} = await t.context.got.post(`users/changepassword?token=${token}`,{json:UserBody});
+  //check response
+  t.is(body.status , 404);
+  t.is(body.message,'Resource Error: User not found.');
+});
+
+ //test that POST /user/changepassword returns statusCode=410 and Resource Error message when token has expired
+ test('POST /changepassword returns correct response and status code when username token has expired', async (t) => {
+  mongoose();
+  const token = jwtSign({username: user.username}); //authenticate user
+
+  // Stub the clock with sinon:
+  const clock = sinon.useFakeTimers();
+  // Move clock forward by 1 hour 
+  await clock.tickAsync(3600000);
+  
+  const UserBody={password : 'NewPass1234'} ; //post body with new password
+  //send POST request with authentication token in query and new password in body
+  const {body} = await t.context.got.post(`users/changepassword?token=${token}`,{json:UserBody});
+  //check response
+  t.is(body.status , 410);
+  t.is(body.message,' Resource Error: Reset token has expired.');
+   // Restore current clock for other tests:
+   clock.restore();
+});
