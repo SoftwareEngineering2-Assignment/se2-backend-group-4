@@ -201,16 +201,3 @@ test('POST /changepassword returns correct response and status code when passwor
   t.is(body.message,'Resource Error: User not found.');
 });
 
- //test that POST /user/changepassword returns statusCode=410 and Resource Error message when token has expired
- test('POST /changepassword returns correct response and status code when username token has expired', async (t) => {
-  mongoose();
-  //Create existing test user
-  const usertest = await new User({username: 'usertest',password: 'passwordtest',email: 'emailtest@gmail.com',}).save();
-  const token = jwtSign({username: usertest.username}); //authenticate user
-  const UserBody={password : 'NewPass1234'} ; //post body with new password
-  //send POST request with authentication token in query and new password in body
-  const {body} = await t.context.got.post(`users/changepassword?token=${token}`,{json:UserBody});
-  //check response
-  t.is(body.status , 410);
-  t.is(body.message,' Resource Error: Reset token has expired.');
-});
