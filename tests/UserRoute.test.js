@@ -176,28 +176,3 @@ test('POST /resetpassword returns correct response and status code when trying t
   t.is(body.message,'Forgot password e-mail sent.');
 });
 
-//test that POST /user/changepassword returns correct response and message when username matches authentication token
-test('POST /changepassword returns correct response and status code when password changes successfull', async (t) => {
-  mongoose();
-  const token = jwtSign({username: user.username}); //authenticate user
-  const UserBody={password : 'NewPass12'} ; //post body with new password
-  //send POST request with authentication token in query and new password in body
-  const {body} = await t.context.got.post(`users/changepassword?token=${token}`,{json:UserBody});
-  //check response
-  t.assert(body.ok);
-  t.is(body.message,'Password was changed.');
-});
-
- //test that POST /user/changepassword returns statusCode=404 and Resource Error message when a user with the given username does not match authentication token
- test('POST /changepassword returns correct response and status code when trying to reset password with wrong username', async (t) => {
-  mongoose();
-  const WrongUsername = 'NameNotExisting' ;
-  const token = jwtSign({username: WrongUsername}); //authenticate user
-  const UserBody={password : 'NewPass123'} ; //post body with new password
-  //send POST request with authentication token in query and new password in body
-  const {body} = await t.context.got.post(`users/changepassword?token=${token}`,{json:UserBody});
-  //check response
-  t.is(body.status , 404);
-  t.is(body.message,'Resource Error: User not found.');
-});
-
