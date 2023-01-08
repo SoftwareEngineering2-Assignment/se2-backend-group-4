@@ -15,11 +15,7 @@ test.before(async (t) => {
   t.context.server = http.createServer(app);
   t.context.prefixUrl = await listen(t.context.server);
   t.context.got = got.extend({http2: true, throwHttpErrors: false, responseType: 'json', prefixUrl: t.context.prefixUrl});
- user = await User.create({
-      username: 'user',
-      password: 'password',
-     email: 'email',
-    });
+  user = await User.create({username: 'user',password: 'password',email: 'email',});
   });
 
 test.after.always((t) => {
@@ -39,12 +35,10 @@ test('GET /dashboards returns correct response and status code', async (t) => {
     mongoose();
     const token = jwtSign({id: user._id});
     //Create 2 new test dashboards for the authenticated user
-    dash1 = await Dashboard({name: 'Dashboard1',layout:[],items:{},nextId: 1,password: '',shared: 0,views: 5,
-                              owner: user._id,createdAt:'',
+    dash1 = await Dashboard({name: 'Dashboard1',layout:[],items:{},nextId: 1,password: '',shared: 0,views: 5,owner: user._id,createdAt:'',
     }).save();
 
-    dash2 = await Dashboard({name: 'Dashboard2',layout:[],items:{},nextId: 2,password: '',shared: 1,views: 7,
-                              owner: user._id,createdAt:'',
+    dash2 = await Dashboard({name: 'Dashboard2',layout:[],items:{},nextId: 2,password: '',shared: 1,views: 7,owner: user._id,createdAt:'',
     }).save();
 
     //send GET request with authenticated user's token in query
@@ -61,7 +55,7 @@ test('GET /dashboards returns correct response and status code', async (t) => {
     //create new dashboard for user with name=Dashname
     //const dashboard1 =  await new Dashboard({name:'DashName',password:'password1'}).save();
     dashboard1 = await Dashboard({name: 'DashName',layout:[],items:{},nextId: 6,password: 'password1',shared: 0,views: 15,
-                                  owner: user._id,createdAt:'',
+                                    owner: user._id,createdAt:'',
     }).save();
 
     const new_name = 'DiffDashName' ;  //dashboard name different from the existing one
@@ -78,13 +72,12 @@ test('GET /dashboards returns correct response and status code', async (t) => {
     //mongoose();
     const token = jwtSign({id: user._id});
     //Create dashboard with name=Dash1 
-    await Dashboard.create({name: 'Dash1',layout:[],items:{},nextId: 1,password: '',shared: 0,views: 5,
-                            owner: user._id,createdAt:'',
+    await Dashboard.create({name: 'Dash1',layout:[],items:{},nextId: 1,password: '',shared: 0,views: 5, owner: user._id,createdAt:'',
     });
 
     //create new dashboard with same name as the existing one
     const NewDash = new Dashboard({name:'Dash1',nextId:2});
-  
+
     //send POST request with authenticated user's token in query and new dashboard name in body
     const {body} = await t.context.got.post(`dashboards/create-dashboard?token=${token}`,{ json :NewDash});
     //check response
@@ -111,8 +104,7 @@ test('POST /delete-dashboard returns correct response when selected dashboard is
   mongoose();
   const token = jwtSign({id: user._id});
 //Create test dashboard
- dash = await Dashboard({name: 'DashToDel',layout:[],items:{},nextId: 1,password: '',shared: 0,views: 5,
-                          owner: user._id,createdAt:'',
+ dash = await Dashboard({name: 'DashToDel',layout:[],items:{},nextId: 1,password: '',shared: 0,views: 5,owner: user._id,createdAt:'',
   }).save();
   
   const id = {id:dash._id}; //id of dashboard created above
@@ -129,10 +121,8 @@ test('GET /dashboard returns correct response when selected dashboard exists', a
   mongoose();
   const token = jwtSign({id: user._id});
  //Create test dashboard 
- dash = await Dashboard({name: 'DashToGet',layout:[],items:{},nextId: 6,password: '',shared: 0,views: 15,
-                          owner: user._id,createdAt:'',
+ dash = await Dashboard({name: 'DashToGet',layout:[],items:{},nextId: 6,password: '',shared: 0,views: 15,owner: user._id,createdAt:'',
   }).save();
-
 
   const id = dash._id; //id of dashboard created above
   //send GET request with authenticated user's token and dashboard's id in query
@@ -147,11 +137,9 @@ test('GET /dashboard returns correct response when selected dashboard exists', a
 test('GET /dashboard returns correct response when selected dashboard does not exists', async (t) => {
   mongoose();
   const token = jwtSign({id:user._id});
-    
   const id = '67ab17187c66d60ad82cf6cc'; //id of non existing dashboard
   //send GET request with authenticated user's token and dashboard's id in query
   const {body} = await t.context.got(`dashboards/dashboard?token=${token}&id=${id}`);
-  
   //check response
   t.is(body.status, 409);
   t.is(body.message, 'The selected dashboard has not been found.');
@@ -162,10 +150,8 @@ test('POST /save-dashboard returns correct response when selected dashboard exis
   mongoose();
   const token = jwtSign({id: user._id});
  //Create test dashboard    
- dash = await Dashboard({name: 'DashToSave',layout:[],items:{},nextId: 6,password: '',shared: 0,views: 15,
-                          owner: user._id,createdAt:'',
+ dash = await Dashboard({name: 'DashToSave',layout:[],items:{},nextId: 6,password: '',shared: 0,views: 15,owner: user._id,createdAt:'',
   }).save();
-
 
   const id = {id:dash._id}; //id of dashboard created above
   //send POST request with authenticated user's token in query and dashboard id in body
@@ -180,14 +166,12 @@ test('POST /save-dashboard returns correct response when selected dashboard exis
 test('POST /save-dashboard returns correct response when selected dashboard is not found ', async (t) => {
   mongoose();
   const token = jwtSign({id: user._id});
-  
   const body_id= {id:0} //dashboard id not existing
 //send POST request with authenticated user's token in query and dashboard id in body
   const {body} = await t.context.got.post(`dashboards/save-dashboard?token=${token}`,{ json :body_id});
   //check response
   t.is(body.status, 409);
   t.is(body.message, 'The selected dashboard has not been found.');
-
 });
 
 //test POST/clone-dashboard clones the dashboard successfully when correct dashboard id and name are given
@@ -195,8 +179,7 @@ test('POST /clone-dashboard returns correct response when dashboard clones succe
   mongoose();
   const token = jwtSign({id: user._id});
  //Create test dashboard 
- dash = await Dashboard({name: 'DashToClone',layout:[],items:{},nextId: 6,password: '',shared: 0,views: 15,
-                          owner: user._id,createdAt:'',
+ dash = await Dashboard({name: 'DashToClone',layout:[],items:{},nextId: 6,password: '',shared: 0,views: 15,owner: user._id,createdAt:'',
   }).save();
   //Name of clone dashboard
   const new_name='DashSuccessClone';
@@ -204,21 +187,17 @@ test('POST /clone-dashboard returns correct response when dashboard clones succe
 
  //send POST request with authenticated user's token in query and dashboard id and new_name in body
   const {body,statusCode} = await t.context.got.post(`dashboards/clone-dashboard?token=${token}`,{json:DashBody});
-  
   //check response
   t.is(statusCode,200);
   t.assert(body.success);
-
 });
 
 //test POST/clone-dashboard returns correct response when correct in is given but new Dashboard name already exists 
 test('POST /clone-dashboard returns correct response when dashboard with same name already exists', async (t) => {
   mongoose();
   const token = jwtSign({id: user._id});
-
  //Creat dashboard we want to clone
- dash1 = await Dashboard({name: 'DashToClone',layout:[],items:{},nextId: 6,password: '',shared: 0,views: 15,
-                            owner: user._id,createdAt:'',
+ dash1 = await Dashboard({name: 'DashToClone',layout:[],items:{},nextId: 6,password: '',shared: 0,views: 15,owner: user._id,createdAt:'',
   }).save();
 
   //Create dashboard with sane name as the one ,we want the cloned dashboard to have
@@ -227,13 +206,11 @@ test('POST /clone-dashboard returns correct response when dashboard with same na
   }).save();
 
   const DashBody = {dashboardId:dash1._id,name:'DashNameExisting'}; //Dashboard body with same name as the one created above
-
   //send POST request with authenticated user's token in query and dashboard id and new_name in body
   const {body} = await t.context.got.post(`dashboards/clone-dashboard?token=${token}`,{json:DashBody});
   //check response
   t.is(body.status, 409);
   t.is(body.message, 'A dashboard with that name already exists.');
-
 });
 
 //test POST/check-password-needed returns correct response when the id given doesn't belong to an existing dashboard
@@ -241,11 +218,8 @@ test('POST /check-password-needed returns correct response when dashboard does n
   mongoose();
   const token = jwtSign({id: user._id});
  //Create test Dashboard
- dash = await Dashboard({name: 'DashToClone',layout:[],items:{},nextId: 6,password: '',shared: 0,views: 15,
-                          owner: user._id,createdAt:'',
+ dash = await Dashboard({name: 'DashToClone',layout:[],items:{},nextId: 6,password: '',shared: 0,views: 15,owner: user._id,createdAt:'',
   }).save();
-
-  
   const wrong_dash_id = '67ab17187c66d60ad82cf6cc'; //wrond dashboard in 
   //post pody
   const DashBody = {user:user._id, dashboardId:wrong_dash_id}; 
@@ -254,7 +228,6 @@ test('POST /check-password-needed returns correct response when dashboard does n
   //check response
   t.is(body.status, 409);
   t.is(body.message, 'The specified dashboard has not been found.');
-
 });
 
 //test POST/check-password-needed returns correct response when owner's id ad existing dashboard id are given
@@ -262,10 +235,8 @@ test('POST /check-password-needed returns correct response when owner wants to a
   mongoose();
   const token = jwtSign({id: user._id});
 //create test dashboard
- dash = await Dashboard({name: 'DashToView',layout:[],items:{},nextId: 6,password: 'null',shared: 1,views: 15,
-                          owner: user._id,createdAt:'',
+ dash = await Dashboard({name: 'DashToView',layout:[],items:{},nextId: 6,password: 'null',shared: 1,views: 15,owner: user._id,createdAt:'',
   }).save();
-
 
   const test_user = {id: user._id} //test_user with same id as the owner
   const DashBody = {user: test_user, dashboardId:dash._id}; //POST body
@@ -275,7 +246,6 @@ test('POST /check-password-needed returns correct response when owner wants to a
   t.is(statusCode,200);
   t.assert(body.success);
   t.is(body.owner, 'self');
-
 });
 
 //test POST/check-password-needed returns correct response when a user tries to access another user's dashboard that is not being shared
@@ -283,8 +253,7 @@ test('POST /check-password-needed returns correct response when dashboard is not
   mongoose();
   const token = jwtSign({id: user._id});
 //Create test dashboard
- dash = await Dashboard({name: 'DashToView',layout:[],items:{},nextId: 6,password: 'null',shared: 0,views: 15,
-                          owner: user._id,createdAt:'',
+ dash = await Dashboard({name: 'DashToView',layout:[],items:{},nextId: 6,password: 'null',shared: 0,views: 15,owner: user._id,createdAt:'',
   }).save();
 
   const diffUserId='63ab2ba0c0fe7142d0f2c003' //User ID different from Owner ID
@@ -297,7 +266,6 @@ test('POST /check-password-needed returns correct response when dashboard is not
   t.assert(body.success);
   t.is(body.owner, '');
   t.assert(!body.shared);
-
 });
 
 //test POST/check-password-needed returns correct response when a users tries to access another user's dashboard that doesn't have password
@@ -326,8 +294,7 @@ test('POST /check-password-needed returns correct response when dashboard shared
   mongoose();
   const token = jwtSign({id: user._id});
 //Create test dashboard
- dash = await Dashboard({name: 'DashToView',layout:[],items:{},nextId: 6,password: '',shared: 1,views: 15,
-                          owner: user._id,createdAt:'',
+ dash = await Dashboard({name: 'DashToView',layout:[],items:{},nextId: 6,password: '',shared: 1,views: 15, owner: user._id,createdAt:'',
   }).save();
 
   const diffUserId='63ab2ba0c0fe7142d0f2c003' //User ID different from Owner ID
@@ -348,8 +315,7 @@ test('POST /check-password returns correct response when dashboard does not exis
   mongoose();
   const token = jwtSign({id: user._id});
 //Create dashboard
- dash = await Dashboard({name:'DashToCheckPassword',layout:[],items:{},nextId: 6,password:'',shared: 0,views: 15,
-                          owner: user._id,createdAt:'',
+ dash = await Dashboard({name:'DashToCheckPassword',layout:[],items:{},nextId: 6,password:'',shared:0,views:15,owner: user._id,createdAt:'',
   }).save();
 
   
@@ -360,7 +326,6 @@ test('POST /check-password returns correct response when dashboard does not exis
   //check response
   t.is(body.status, 409);
   t.is(body.message, 'The specified dashboard has not been found.');
-
 });
 
 //test POST/check-password returns correct response when dashboard id is correct but password wrong
@@ -368,11 +333,9 @@ test('POST /check-password returns correct response when given password is wrong
   mongoose();
   const token = jwtSign({id: user._id});
 //Create test dashboard
- dash = await Dashboard({name:'DashToCheckPassword',layout:[],items:{},nextId: 6,password:'',shared: 0,views: 15,
-                          owner: user._id,createdAt:'',
+ dash = await Dashboard({name:'DashToCheckPassword',layout:[],items:{},nextId: 6,password:'',shared: 0,views: 15,owner: user._id,createdAt:'',
   }).save();
-
-  
+ 
   const wrong_password = '123wrongpassword123'; //wrong password
   const DashBody = {dashboardId:dash._id , password:wrong_password};  //POST body
 //send POST request with authenticated user's token in query , wrong password and existing dashboard id in body
@@ -381,7 +344,6 @@ test('POST /check-password returns correct response when given password is wrong
   t.is(statusCode,200);
   t.assert(body.success);
   t.assert(!body.correctPassword);
-
 });
 
 //test POST /check-password returns correct response when given dashboard id and password are correct
@@ -400,7 +362,6 @@ test('POST /check-password returns correct response when given password is corre
   t.is(statusCode,200);
   t.assert(body.success);
   t.assert(body.correctPassword);
-
 });
 
 //test POST /share-dashboard returns correct response when given dashboard id doesnt match any of the user's dashboard ids
@@ -408,11 +369,9 @@ test('POST /share-dashboard returns correct response when dashboard does not exi
   mongoose();
   const token = jwtSign({id: user._id});
 //Create test dashboard
- dash = await Dashboard({name: 'DashToCheckPassword',layout:[],items:{},nextId: 6,password: '',shared: 0,views: 15,
-                          owner: user._id,createdAt:'',
+ dash = await Dashboard({name:'DashToCheckPassword',layout:[],items:{},nextId:6,password:'',shared:0,views:15,owner:user._id,createdAt:'',
   }).save();
 
-  
   const wrong_dash_id = '67ab17187c66d60ad82cf6cc'; //dashboard id that doesn't exist
   const DashBody = {dashboardId:wrong_dash_id}; //POST body
   //send POST request with authenticated user's token in query , non existing dashboard id in body
@@ -420,7 +379,6 @@ test('POST /share-dashboard returns correct response when dashboard does not exi
   //check response
   t.is(body.status, 409);
   t.is(body.message, 'The specified dashboard has not been found.');
-
 });
 
 //test POST /share-dashboard successfully shares a dashboard that was not being shared,when correct id is given
@@ -428,8 +386,7 @@ test('POST /share-dashboard returns correct response when shared successfully', 
   mongoose();
   const token = jwtSign({id: user._id});
 //Create test dashboard that is not being shared
- dash = await Dashboard({name: 'DashToCheckPassword',layout:[],items:{},nextId: 6,password: '',shared: 0,views: 15,
-                          owner: user._id,createdAt:'',
+ dash = await Dashboard({name:'DashToCheckPassword',layout:[],items:{},nextId:6,password:'',shared:0,views:15,owner: user._id,createdAt:'',
   }).save();
 
   const DashBody = {dashboardId:dash._id};  //POST body
@@ -446,8 +403,7 @@ test('POST /share-dashboard returns correct response when dashboard stops being 
   mongoose();
   const token = jwtSign({id: user._id});
 //Create test dashboard that is being shared
- dash = await Dashboard({ name: 'DashToCheckPassword',layout:[],items:{},nextId: 6,password: '',shared: 1,views: 15,
-                          owner: user._id,createdAt:'',
+ dash = await Dashboard({name: 'DashToCheckPassword',layout:[],items:{},nextId:6,password:'',shared:1,views:15,owner: user._id,createdAt:'',
   }).save();
 
   const DashBody = {dashboardId:dash._id}; //POST body
@@ -476,7 +432,6 @@ test('POST /change-password returns correct response when dashboard does not exi
   //check response
   t.is(body.status, 409);
   t.is(body.message, 'The specified dashboard has not been found.');
-
 });
 
 //test POST /change-password successfully changes password when valid dashboard id and new password are given

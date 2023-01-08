@@ -2,9 +2,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const {authorization} = require('../middlewares');
-
 const router = express.Router();
-
 const Dashboard = require('../models/dashboard');
 const Source = require('../models/source');
 
@@ -19,13 +17,8 @@ router.get('/dashboards',
       const dashboards = [];
       //append id, name and views for each found Dashboard
       foundDashboards.forEach((s) => {
-        dashboards.push({
-          id: s._id,
-          name: s.name,
-          views: s.views
-        });
+        dashboards.push({id: s._id,name: s.name,views: s.views});
       });
-
       //return body for success
       return res.json({
         success: true,
@@ -55,13 +48,7 @@ router.post('/create-dashboard',
         });
       }
       //create new Dashboard
-      await new Dashboard({
-        name,
-        layout: [],
-        items: {},
-        nextId: 1,
-        owner: mongoose.Types.ObjectId(id)
-      }).save();
+      await new Dashboard({name,layout: [],items: {},nextId: 1,owner: mongoose.Types.ObjectId(id)}).save();
       //return body for success
       return res.json({success: true});
     } 
@@ -145,11 +132,7 @@ router.post('/save-dashboard',
       const {id, layout, items, nextId} = req.body;
       //find one Dashboard with owner id same as token id, and Dashboard id same as the id given in req.body and update it
       const result = await Dashboard.findOneAndUpdate({_id: mongoose.Types.ObjectId(id), owner: mongoose.Types.ObjectId(req.decoded.id)}, {
-        $set: {
-          layout,
-          items,
-          nextId
-        }
+        $set: {layout,items,nextId}
       }, {new: true});
       //return body if Dashboard matching the given id was not found
       if (result === null) {
@@ -185,12 +168,7 @@ router.post('/clone-dashboard',
       //find one Dashboard with owner id same as token id, and Dashboard id same as the id given in req.body 
       const oldDashboard = await Dashboard.findOne({_id: mongoose.Types.ObjectId(dashboardId), owner: mongoose.Types.ObjectId(req.decoded.id)});
       //new clone Dashboard with name given in req.body
-      await new Dashboard({
-        name,
-        layout: oldDashboard.layout,
-        items: oldDashboard.items,
-        nextId: oldDashboard.nextId,
-        owner: mongoose.Types.ObjectId(req.decoded.id)
+      await new Dashboard({name,layout: oldDashboard.layout,items: oldDashboard.items,nextId: oldDashboard.nextId,owner: mongoose.Types.ObjectId(req.decoded.id)
       }).save();
       //return body for success
       return res.json({success: true});
@@ -345,30 +323,30 @@ router.post('/share-dashboard',
 
 //Router function for Dashboard password change
 router.post('/change-password', 
-  authorization,
-  async (req, res, next) => {
-    try {
-      const {dashboardId, password} = req.body;
-      const {id} = req.decoded;
-      //find one Dashboard with owner id same as token id, and Dashboard id same as the id given in req.body
-      const foundDashboard = await Dashboard.findOne({_id: mongoose.Types.ObjectId(dashboardId), owner: mongoose.Types.ObjectId(id)});
-      //return body if no Dashboard with given id was found
-      if (!foundDashboard) {
-        return res.json({
-          status: 409,
-          message: 'The specified dashboard has not been found.'
-        });
-      }
-      foundDashboard.password = password;
-      
-      await foundDashboard.save();
-      //return body for successful password change
-      return res.json({success: true});
-    } 
-    //error handling
-    catch (err) {
-      return next(err.body);
+authorization,
+async (req, res, next) => {
+  try {
+    const {dashboardId, password} = req.body;
+    const {id} = req.decoded;
+    //find one Dashboard with owner id same as token id, and Dashboard id same as the id given in req.body
+    const foundDashboard = await Dashboard.findOne({_id: mongoose.Types.ObjectId(dashboardId), owner: mongoose.Types.ObjectId(id)});
+    //return body if no Dashboard with given id was found
+    if (!foundDashboard) {
+      return res.json({
+        status: 409,
+        message: 'The specified dashboard has not been found.'
+      });
     }
-  }); 
+    foundDashboard.password = password;
+    
+    await foundDashboard.save();
+    //return body for successful password change
+    return res.json({success: true});
+  } 
+  //error handling
+  catch (err) {
+    return next(err.body);
+  }
+}); 
 
 module.exports = router;
