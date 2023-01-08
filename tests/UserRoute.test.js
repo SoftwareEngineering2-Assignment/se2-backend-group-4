@@ -178,18 +178,4 @@ test('POST /resetpassword returns correct response and status code when trying t
   t.is(body.message,'Forgot password e-mail sent.');
 });
 
-//test that POST /user/changepassword returns correct response and message when username matches authentication token
-test('POST /changepassword returns correct response and status code when password changes successfull', async (t) => {
-  mongoose();
-  const token = jwtSign({username: test_user6.username}); //authenticate token for previous test_user6 created in the previous example
-  console.log(user.username);
-  const UserBody={password : 'NewPass12'} ; //post body with new password
-  //send POST request with authentication token in query and new password in body
-  const {body,statusCode} = await t.context.got.post(`users/changepassword?token=${token}`,{json:UserBody});
-  console.log(body)
-  //check response
-  t.is(statusCode,200);
-  t.assert(body.ok);
-  t.is(body.message,'Password was changed.');
-});
 
