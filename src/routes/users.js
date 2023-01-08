@@ -108,6 +108,7 @@ router.post('/changepassword',
         });
       }
       const reset = await Reset.findOneAndRemove({username});
+      console.log(reset)
       if (!reset) {
         return res.json({
           status: 410,

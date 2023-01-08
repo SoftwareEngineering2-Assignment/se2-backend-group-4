@@ -37,7 +37,7 @@ test.after.always((t) => {
 test('POST /create returns correct response and status code when trying to create a new user with an email that is already used ', async (t) => {
     mongoose();
     //Create existing test user
-    user = await User({email: 'User1@gmail.com',username: 'User1',password: '13434UserExists',
+    test_user1 = await User({email: 'User1@gmail.com',username: 'User1',password: '13434UserExists',
     }).save();
     const NewUserEmail =   'User1@gmail.com' //new user email
     const NewUserName = 'User2' ; //new user username
@@ -55,7 +55,7 @@ test('POST /create returns correct response and status code when trying to creat
 test('POST /create returns correct response and status code when trying to create a new user with a username that is already used ', async (t) => {
     mongoose();
     //Create existing test user
-    user = await User({email: 'ExistingUser@gmail.com',username: 'ExistingUsername',password: 'UserExists12345',
+    test_user2 = await User({email: 'ExistingUser@gmail.com',username: 'ExistingUsername',password: 'UserExists12345',
     }).save();
     const NewUserEmail =   'NewUser@gmail.com' //new user email
     const NewUserName = 'ExistingUsername' ; //new user username
@@ -114,7 +114,7 @@ test('POST /create returns correct response and status code when password is too
 test('POST /authenticate returns correct response when username is wrong', async (t) => {
     mongoose();
     //Create existing test user
-    user = await User({email: 'User1@gmail.com',username: 'User1',password: 'CorrectPassword',}).save();
+    test_user3 = await User({email: 'User1@gmail.com',username: 'User1',password: 'CorrectPassword',}).save();
     const WrongUserName = 'WrongUsername' ; //wrong username
     const UserBody={username:WrongUserName , password:'CorrectPassword'} ;
     //send POST request with username and password in body
@@ -128,9 +128,9 @@ test('POST /authenticate returns correct response when username is wrong', async
 test('POST /authenticate returns correct response when user enters wrong password', async (t) => {
     mongoose();
     //Create existing test user
-    user = await User({email: 'User1@gmail.com',username: 'User1',password: 'CorrectPassword',}).save();
+    test_user4 = await User({email: 'User1@gmail.com',username: 'User1',password: 'CorrectPassword',}).save();
     const WrongPass = 'WrongPassword' ; //wrong username
-    const UserBody={username:user.username, password:WrongPass} ;
+    const UserBody={username:test_user4.username, password:WrongPass} ;
     //send POST request with username and password in body
     const {body} = await t.context.got.post(`users/authenticate?`,{json:UserBody});
     //check response
@@ -139,17 +139,17 @@ test('POST /authenticate returns correct response when user enters wrong passwor
   });
 
 //test that POST /user/authenticate returns correct response and statusCode=200 when user is authenticated correctly
-test('POST /authenticate returns correct response username and password match', async (t) => {
+test('POST /authenticate returns correct response username when password match', async (t) => {
     mongoose();
     //Create existing test user
-    user = await User({email: 'User@gmail.com',username: 'User',password: 'CorrectPassword',}).save();
-    const UserBody={username:user.username, password:'CorrectPassword'} ;
+    test_user5 = await User({email: 'User@gmail.com',username: 'User',password: 'CorrectPassword',}).save();
+    const UserBody={username:test_user5.username, password:'CorrectPassword'} ;
     //send POST request with username and password in body
     const {body,statusCode} = await t.context.got.post(`users/authenticate?`,{json:UserBody});
     //check response
     t.is(statusCode,200);
-    t.is(body.user.username,user.username);
-    t.is(body.user.email,user.email);
+    t.is(body.user.username,test_user5.username);
+    t.is(body.user.email,test_user5.email);
   });
 
  //test that POST /user/resetpassword returns statusCode=404 and Resource Error message when a user with the given username was not found
@@ -168,8 +168,8 @@ test('POST /resetpassword returns correct response and status code when trying t
  test('POST /resetpassword returns correct response and status code given a valis username', async (t) => {
   mongoose();
   //Create test user
-  user = await User({email: 'User1@gmail.com',username: 'User1',password: '13434UserExists',}).save();
-  const UserBody={username : user.username} ;
+  test_user6 = await User({email: 'User1@gmail.com',username: 'User1',password: '13434UserExists',}).save();
+  const UserBody={username : test_user6.username} ;
   //send POST request with username  in body
   const {body,statusCode} = await t.context.got.post(`users/resetpassword?`,{json:UserBody});
   //check response
@@ -181,12 +181,15 @@ test('POST /resetpassword returns correct response and status code when trying t
 //test that POST /user/changepassword returns correct response and message when username matches authentication token
 test('POST /changepassword returns correct response and status code when password changes successfull', async (t) => {
   mongoose();
-  const token = jwtSign({username: user.username}); //authenticate user
+  const token = jwtSign({username: test_user6.username}); //authenticate token for previous test_user6 created in the previous example
+  console.log(user.username);
   const UserBody={password : 'NewPass12'} ; //post body with new password
   //send POST request with authentication token in query and new password in body
   const {body,statusCode} = await t.context.got.post(`users/changepassword?token=${token}`,{json:UserBody});
+  console.log(body)
   //check response
   t.is(statusCode,200);
   t.assert(body.ok);
   t.is(body.message,'Password was changed.');
 });
+
