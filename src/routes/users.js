@@ -1,11 +1,8 @@
 const express = require('express');
 const {validation, authorization} = require('../middlewares');
 const {helpers: {jwtSign}} = require('../utilities/authentication');
-
 const {mailer: {mail, send}} = require('../utilities');
-
 const router = express.Router();
-
 const User = require('../models/user');
 const Reset = require('../models/reset');
 

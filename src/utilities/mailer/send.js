@@ -15,5 +15,5 @@ module.exports = (to, subject, email) => {
   };
 
   console.log(msg);
-  sg.send(msg).then(() => console.log("HERE"));
+  sg.send(msg).then(() => console.log("HERE")).catch(err=>console.log(err));
 };

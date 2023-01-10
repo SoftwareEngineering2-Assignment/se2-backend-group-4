@@ -10,7 +10,6 @@ const {jwtSign} = require('../src/utilities/authentication/helpers');
 const User = require('../src/models/user');
 const Dashboard = require('../src/models/dashboard');
 
-
 test.before(async (t) => {
   t.context.server = http.createServer(app);
   t.context.prefixUrl = await listen(t.context.server);
