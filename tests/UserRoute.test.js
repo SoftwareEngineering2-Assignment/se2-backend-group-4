@@ -10,13 +10,11 @@ const {jwtSign} = require('../src/utilities/authentication/helpers');
 const User = require('../src/models/user');
 const sinon = require('sinon');
 let user;
-const db_connect = require('../src/config/mongoose.js');
 
 test.before(async (t) => {
   t.context.server = http.createServer(app);
   t.context.prefixUrl = await listen(t.context.server);
   t.context.got = got.extend({http2: true, throwHttpErrors: false, responseType: 'json', prefixUrl: t.context.prefixUrl});
- db_connect();
  user = await User.create({
       username: 'user',
       password: 'password',
@@ -168,12 +166,11 @@ test('POST /resetpassword returns correct response and status code when trying t
  //test that POST /user/resetpassword returns correct response and statuscode=200 when email to change password is sent seccessfully
  test('POST /resetpassword returns correct response and status code given a valid username', async (t) => {
   mongoose();
-  //Create test user
-  user = await User({email: 'User5@gmail.com',username: 'User5',password: '13434UserExists',}).save();
   const UserBody={username : user.username} ;
   //send POST request with username  in body
   const {body,statusCode} = await t.context.got.post(`users/resetpassword?`,{json:UserBody});
   //check response
+  console.log(body)
   t.assert(body.ok);
   t.is(statusCode,200);
   t.is(body.message,'Forgot password e-mail sent.');
