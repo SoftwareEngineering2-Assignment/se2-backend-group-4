@@ -1,5 +1,7 @@
+// Import the mongoose module
 const mongoose = require('mongoose');
 
+//Setup options to avoid deprecation warnings
 const mongooseOptions = {
   useNewUrlParser: true,
   useCreateIndex: true,
@@ -9,6 +11,8 @@ const mongooseOptions = {
   keepAlive: true,
   keepAliveInitialDelay: 300000
 };
+
+// Set up URI secret mongoose connection
 const mongodbUri = process.env.MONGODB_URI;
   
 module.exports = () => {

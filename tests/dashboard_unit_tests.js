@@ -3,25 +3,12 @@ require('dotenv').config();
 
 const test = require('ava').default;
 const Dashboard = require('../src/models/dashboard');
-const db_connect = require('../src/config/mongoose.js');
 const {mongoose} = require('../src/config');
-
-
-
-async function createDashboard(name='',layout , items, nextId ,password='' , shared ,views  ){
-    try {
-        const dashboard = await new Dashboard({name,layout , items, nextId ,password , shared ,views  }).save();
-        return dashboard;
-    }
-    catch(e){
-        return Promise.reject(reason=e);
-    }
-}
 
 //test that a dashboard cant be created without a name
 test('Create dashboard without name',async t => {
     mongoose();
-    const dashboard =  await t.throwsAsync(createDashboard());
+    const dashboard =  await t.throwsAsync(Dashboard.create({}));
     t.is(dashboard.message,'dashboards validation failed: name: Dashboard name is required')
     Dashboard.deleteOne({});
 });

@@ -1,19 +1,18 @@
 /* eslint-disable import/no-unresolved */
 require('dotenv').config();
-
 const test = require('ava').default;
 const User = require('../src/models/user');
-const db_connect = require('../src/config/mongoose.js');
 const {mongoose} = require('../src/config');
 const { UnsupportedProtocolError } = require('got/dist/source');
 
-
+//test that user cant be crated without username ,password and email
 test('Create user without username/password/email',async t => {
     mongoose();
     const result =  await t.throwsAsync(User.create({}));
     t.is(result.message,'users validation failed: password: User password is required, username: Username is required, email: User email is required')
 });
 
+//test that user can't be created with password length shorter than 5 characters
 test('Create user with password less than minimum length',async t => {
     mongoose();
     const result2 =  await t.throwsAsync(User.create({username:'bot',password:'beep',email:'notabot@gmail.com'}));
@@ -21,6 +20,7 @@ test('Create user with password less than minimum length',async t => {
     User.deleteOne({username:'bot'});
 });
 
+//test that a user can be created successfully with valid inputs
 test('Create user',async t => {
     mongoose();
     const result3 = await User.create({username:'bot',password:'beepbop',email:'notabot@gmail.com'}); 
@@ -28,6 +28,7 @@ test('Create user',async t => {
     User.deleteOne({username:'bot'});
 });
 
+//test comparePassword function
 test('Compare password',async t => {
     mongoose();
     const result4 = await User.create({username:'bot',password:'beepbop',email:'notabot@gmail.com'}); 
