@@ -1,14 +1,8 @@
 /* eslint-disable import/no-unresolved */
 require('dotenv').config();
 const {mongoose} = require('../src/config');
-const http = require('node:http');
-const test = require('ava').default;
-const got = require('got');
-const listen = require('test-listen');
-const app = require('../src/index');
 const {jwtSign} = require('../src/utilities/authentication/helpers');
-const User = require('../src/models/user');
-const Dashboard = require('../src/models/dashboard');
+const {http,test,got,listen,app,User,Dashboard,DeleteUsersAndDashboards} = require('../src/DashboardImport');
 
 test.before(async (t) => {
   t.context.server = http.createServer(app);
@@ -19,14 +13,8 @@ test.before(async (t) => {
 
 test.after.always((t) => {
   t.context.server.close();
-  //delete test user, after test is over
-  User.findByIdAndDelete(user._id);
-  //delete test dashboards created , after test is over
-  Dashboard.deleteMany({}, 
-    function(err){
-      if(err) console.log(err);
-      console.log("Successful deletion");
-    });
+  //delete users and dashboards created for testing
+  DeleteUsersAndDashboards();
 });
 
 //test POST/check-password-needed returns correct response when the id given doesn't belong to an existing dashboard
