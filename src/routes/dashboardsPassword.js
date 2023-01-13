@@ -6,31 +6,6 @@ const {authorization} = require('../middlewares');
 const router = express.Router();
 const Dashboard = require('../models/dashboard');
 
-//Router function for viewing Dashboards
-router.get('/dashboards',
-  authorization,
-  async (req, res, next) => {
-    try {
-      const {id} = req.decoded;
-      //find all Dashboards with owner id same as token id
-      const foundDashboards = await Dashboard.find({owner: mongoose.Types.ObjectId(id)});
-      const dashboards = [];
-      //append id, name and views for each found Dashboard
-      foundDashboards.forEach((s) => {
-        dashboards.push({id: s._id,name: s.name,views: s.views});
-      });
-      //return body for success
-      return res.json({
-        success: true,
-        dashboards
-      });
-    } 
-    //error handling
-    catch (err) {
-      return next(err.body);
-    }
-  });
-
 //Router function for checking if Dashboard password is needed to view it
 router.post('/check-password-needed', 
 async (req, res, next) => {
