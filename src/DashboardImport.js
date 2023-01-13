@@ -11,13 +11,17 @@ const Dashboard = require('./models/dashboard');
 //function to delete test users and dashboards
 function DeleteUsersAndDashboards() {
   //delete test user, after test is over
-  User.findByIdAndDelete(user._id);
+  User.deleteMany({}, 
+    function(err){
+      if(err) console.log(err);
+      console.log("Successful deletion");
+    });
   //delete test dashboards created , after test is over
   Dashboard.deleteMany({}, 
     function(err){
       if(err) console.log(err);
       console.log("Successful deletion");
     });
-};
+}
 
 module.exports = {http,test,got,listen,app,User,Dashboard,DeleteUsersAndDashboards};
