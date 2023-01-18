@@ -1,13 +1,8 @@
 /* eslint-disable import/no-unresolved */
 require('dotenv').config();
 const {mongoose} = require('../src/config');
-const http = require('node:http');
-const test = require('ava').default;
-const got = require('got');
-const listen = require('test-listen');
-const app = require('../src/index');
+const {http,test,got,listen,app,User} = require('../src/RouteImport');
 const {jwtSign} = require('../src/utilities/authentication/helpers');
-const User = require('../src/models/user');
 const sinon = require('sinon');
 let user;
 

@@ -2,7 +2,7 @@
 require('dotenv').config();
 const {mongoose} = require('../src/config');
 const {jwtSign} = require('../src/utilities/authentication/helpers');
-const {http,test,got,listen,app,User,Dashboard,DeleteUsersAndDashboards} = require('../src/DashboardImport');
+const {http,test,got,listen,app,User,Dashboard,DeleteUsersAndDashboards} = require('../src/RouteImport');
 
 test.before(async (t) => {
   t.context.server = http.createServer(app);
