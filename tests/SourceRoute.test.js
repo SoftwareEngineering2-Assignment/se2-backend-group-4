@@ -9,6 +9,7 @@ const app = require('../src/index');
 const {jwtSign} = require('../src/utilities/authentication/helpers');
 const User = require('../src/models/user');
 const Source = require('../src/models/source');
+const sinon = require('sinon');
 
 
 test.before(async (t) => {
@@ -270,4 +271,126 @@ test('POST sources/check-sources returns correct response and status code', asyn
   //check response
   t.is(statusCode,200);
   t.assert(body.success);
+});
+
+//test that GET /sources returns status code 500 when error is thrown
+test('GET /sources handles error correctly', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test source for the authenticated user
+  source = await Source({name:'source1',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
+  }).save();
+  //Throw error
+  const Stub = sinon.stub(Source, 'find').rejects(new Error('Something went wrong!'))
+  //send GET request with authenticated user's token in query
+  const {body} = await t.context.got(`sources/sources?token=${token}`);
+  //check response
+  t.is(body.status,500);
+  t.is(body.message,'Something went wrong!');
+  
+  //Restore sub
+  Stub.restore();
+});
+
+//test that POST /sources returns status code 500 when error is thrown
+test('POST /create-source handles error correctly ', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test source for the authenticated user
+  source = await Source({name:'sourceName',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
+  }).save();
+  const newName = 'DifferentsourceName' ; //new source name same as existing one
+  const sourceBody={name:newName} ;
+  //Throw error
+  const Stub = sinon.stub(Source, 'findOne').rejects(new Error('Something went wrong!'))
+  //send POST request with authenticated user's token in query , and new source name in body
+  const {body, statusCode} = await t.context.got.post(`sources/create-source?token=${token}`,{json:sourceBody});
+  //Check response
+  t.is(body.status,500);
+  t.is(body.message,'Something went wrong!');
+  
+  //Restore sub
+  Stub.restore();
+});
+
+//test that POST /change-source returns status code 500 when error is thrown
+test('POST /change-source handles error correctly ', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test sources for the authenticated user
+  source = await Source({name:'sourceName1',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
+  }).save();
+  //Try to change name of source1 to that of source2
+  const source_id =source._id; //id of source1 
+  const new_name = 'NewSourceName'; //id of source2
+  const sourceBody={id:source_id , name:new_name} ; //POST body
+  //Throw error
+  const Stub = sinon.stub(Source, 'findOne').rejects(new Error('Something went wrong!'))
+  //send POST request with authenticated user's token in query , and id and name in body
+  const {body} = await t.context.got.post(`sources/change-source?token=${token}`,{json:sourceBody});
+  //Check response
+  t.is(body.status,500);
+  t.is(body.message,'Something went wrong!');
+  
+  //Restore sub
+  Stub.restore();
+});
+
+//test POST /delete-source returns status code 500 when error is thrown
+test('POST /delete-source handles error correctly ', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test source for the authenticated user
+  source = await Source({name:'sourceToDel',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
+  }).save();
+
+  const source_id =source._id; //source id to delete
+  const sourceBody={id:source_id} ; //POST body
+  //Throw error
+  const Stub = sinon.stub(Source, 'findOneAndRemove').rejects(new Error('Something went wrong!'));
+  //send POST request with authenticated user's token in query , and source id in body
+  const {body} = await t.context.got.post(`sources/delete-source?token=${token}`,{json:sourceBody});
+  //Check response
+  t.is(body.status,500);
+  t.is(body.message,'Something went wrong!');
+  
+  //Restore sub
+  Stub.restore();
+});
+
+//test POST /source returns status code 500 when error is thrown
+test('POST /source handles error correctly ', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test source for the authenticated user
+  source = await Source({name:'sourceName',type: '',url:'',login:'',passcode:'',vhost: '',owner: user._id,createdAt:'',
+  }).save();
+  const sourceBody={name:'sourceName' , owner:source.owner , user:user._id } ; //POST body
+  //Throw error
+  const Stub = sinon.stub(Source, 'findOne').throws(new Error('Something went wrong!'));
+  //send POST request with authenticated user's token in query , and name ,owner_id user_id in body
+  const {body} = await t.context.got.post(`sources/source?token=${token}`,{json:sourceBody});
+  //Check response
+  t.is(body.status,500);
+  t.is(body.message,'Something went wrong!');
+    
+  //Restore sub
+  Stub.restore();
+});
+
+//test that POST /check-sources returns status code 500 when error is thrown
+test('POST sources/check-sources handles error correctly', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  const sourceBody={sources:[source1,source2,source3]} ; //POST body
+  //Throw error
+  const Stub = sinon.stub(Source, 'findOne').throws(new Error('Something went wrong!'));
+  //send POST request with authenticated user's token in query , and id and name in body
+  const {body} = await t.context.got.post(`sources/check-sources?token=${token}`,{json:sourceBody});
+  //t.is(body.status,500);
+  t.is(body.status,500);
+  t.is(body.message,'Something went wrong!');
+    
+  //Restore sub
+  Stub.restore();
 });
