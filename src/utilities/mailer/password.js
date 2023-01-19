@@ -6,7 +6,6 @@ const link = (token) => `${baseUrl}/reset-password?token=${token}`;
  * Creates and returns an email with a password reset token. The parameters given are the
  * platform's logo and the reset token needed for chaning the password.
  */
-
 module.exports = (token) => (`
     <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd>
     <html xmlns="http://www.w3.org/1999/xhtml" style="font-family: Helvetica, Arial, sans-serif; box-sizing: border-box; font-size: 14px; margin: 0;">
