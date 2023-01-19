@@ -36,7 +36,7 @@ router.get('/statistics',
         sources
       });
     } catch (err) {
-      return next(err.body);
+      return next(err);
     }
   });
 

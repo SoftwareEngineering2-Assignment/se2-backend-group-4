@@ -1,13 +1,8 @@
 /* eslint-disable import/no-unresolved */
 require('dotenv').config();
 const {mongoose} = require('../src/config');
-const http = require('node:http');
-const test = require('ava').default;
-const got = require('got');
-const listen = require('test-listen');
-const app = require('../src/index');
+const {http,test,got,listen,app,User} = require('../src/RouteImport');
 const {jwtSign} = require('../src/utilities/authentication/helpers');
-const User = require('../src/models/user');
 const sinon = require('sinon');
 let user;
 
@@ -176,7 +171,7 @@ test('POST /resetpassword returns correct response and status code when trying t
   t.is(body.message,'Forgot password e-mail sent.');
 });
 
- //test that POST /user/resetpassword returns statusCode=200 when password changes successfully
+ //test that POST /user/changepassword returns statusCode=200 when password changes successfully
  test('POST /changepassword returns correct response and status code when password changes successfully', async (t) => {
   mongoose();
   const token = jwtSign({username : user.username});
@@ -189,7 +184,7 @@ test('POST /resetpassword returns correct response and status code when trying t
   t.is(body.message,'Password was changed.');
 });
 
-  //test that POST /user/resetpassword returns statusCode=404 and Resource Error message when username is wrong
+  //test that POST /user/changepassword returns statusCode=404 and Resource Error message when username is wrong
   test('POST /changepassword returns correct response and status code when user is not found', async (t) => {
     mongoose();
     const token = jwtSign({username : 'WrongUserName'});
@@ -220,3 +215,75 @@ test('POST /resetpassword returns correct response and status code when trying t
      // Restore current clock for other tests:
      clock.restore();
   });
+
+    //test that POST /user/create returns status code 500 when error is thrown
+test('POST /create handles error correctly', async (t) => {
+  mongoose();
+  //Create existing test user
+  user = await User({email: 'User1@gmail.com',username: 'User1',password: '13434UserExists',
+  }).save();
+  const NewUserEmail =   'User1@gmail.com' //new user email
+  const NewUserName = 'User2' ; //new user username
+  const NewUserPassword = 'Pass1234'; //new user password
+  const UserBody={email:NewUserEmail , username:NewUserName , password:NewUserPassword} ;
+  //Throw error
+  sinon.stub(User, 'findOne').rejects(new Error('Something went wrong'))
+  //send POST request with New user email ,username and password in body
+  const {body} = await t.context.got.post(`users/create?`,{json:UserBody});
+  //check response
+  t.is(body.status,500);
+  t.is(body.message,'Something went wrong');
+
+  User.findOne.restore();
+});
+
+//test that POST /user/authenticate returns status code 500 when error is thrown
+test('POST /authenticate handles error correctly', async (t) => {
+  mongoose();
+  //Create existing test user
+  user = await User({email: 'User4@gmail.com',username: 'User4',password: 'CorrectPassword',}).save();
+  //Throw error
+  sinon.stub(User, 'findOne').throws(new Error('Something went wrong'))
+  const UserBody={username : user.username, password:'CorrectPassword'} ;
+  //send POST request with username and password in body
+  const {body} = await t.context.got.post(`users/authenticate?`,{json:UserBody});
+  //check response
+  t.is(body.status,500);
+  t.is(body.message,'Something went wrong');
+
+  //Restore sub
+  User.findOne.restore();
+});
+
+ //test that POST /user/resetpassword returns status code 500 when error is thrown
+ test('POST /resetpassword handles error correctly', async (t) => {
+  mongoose();
+  const UserBody={username : user.username} ;
+  //Throw error
+  sinon.stub(User, 'findOne').rejects(new Error('Something went wrong'))
+  //send POST request with username  in body
+  const {body} = await t.context.got.post(`users/resetpassword?`,{json:UserBody});
+  //check response
+  t.is(body.status,500);
+  t.is(body.message,'Something went wrong');
+  
+  //Restore sub
+  User.findOne.restore();
+});
+
+ //test that POST /user/changepassword returns status code 500 when error is thrown
+ test('POST /changepassword handles error correctly', async (t) => {
+  mongoose();
+  const token = jwtSign({username : user.username});
+  const UserBody={password: 'NewPass12'} ;
+  //Throw error
+  sinon.stub(User, 'findOne').throws(new Error('Something went wrong'))
+  //send POST request with new password in body
+  const {body} = await t.context.got.post(`users/changepassword?token=${token}`,{json:UserBody});
+  //check response
+  t.is(body.status,500);
+  t.is(body.message,'Something went wrong');
+  
+  //Restore sub
+  User.findOne.restore();
+});

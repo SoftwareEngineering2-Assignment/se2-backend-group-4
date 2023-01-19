@@ -2,7 +2,8 @@
 require('dotenv').config();
 const {mongoose} = require('../src/config');
 const {jwtSign} = require('../src/utilities/authentication/helpers');
-const {http,test,got,listen,app,User,Dashboard,DeleteUsersAndDashboards} = require('../src/DashboardImport');
+const {http,test,got,listen,app,User,Dashboard,DeleteUsersAndDashboards} = require('../src/RouteImport');
+const sinon = require('sinon');
 
 test.before(async (t) => {
   t.context.server = http.createServer(app);
@@ -250,7 +251,84 @@ test('POST /check-password-needed returns correct response when dashboard does n
     const new_password='123NewPassword' //new dashboard passwrod
     const DashBody = {dashboardId:dash._id,password:new_password}; //POST body
     //send POST request with authenticated user's token in query , valid new password and dashboard id in body
-    const {body} = await t.context.got.post(`dashboardsPassword/change-password?token=${token}`,{json:DashBody});
+    const {body,statusCode} = await t.context.got.post(`dashboardsPassword/change-password?token=${token}`,{json:DashBody});
     //check response
     t.assert(body.success);
+    t.is(statusCode,200);
+  });
+
+    //test POST/check-password-needed returns status code 500 when error is thrown
+    test('POST /check-password-needed handles error correctly ', async (t) => {
+      mongoose();
+      const token = jwtSign({id: user._id});
+    //create test dashboard
+     dash = await Dashboard({name: 'DashToView',layout:[],items:{},nextId: 6,password: 'null',shared: 1,views: 15,owner: user._id,createdAt:'',}).save();
+      const test_user = {id: user._id} //test_user with same id as the owner
+      const DashBody = {user: test_user, dashboardId:dash._id}; //POST body
+      //Throw error
+      const Stub = sinon.stub(Dashboard, 'findOne').throws(new Error('Something went wrong!'));
+      //send POST request with authenticated user's token in query , owner id and correct dashboard id in body
+      const {body} = await t.context.got.post(`dashboardsPassword/check-password-needed?token=${token}`,{json:DashBody});
+      //check response
+      t.is(body.status,500);
+      t.is(body.message,'Something went wrong!');
+      //Restore sub
+      Stub.restore();
+    });
+
+      //test POST/check-password returns status code 500 when error is thrown
+  test('POST /check-password handles error correctly', async (t) => {
+    mongoose();
+    const token = jwtSign({id: user._id});
+  //Create test dashboard
+   dash = await Dashboard({name:'DashToCheckPassword',layout:[],items:{},nextId: 6,password:'',shared: 0,views: 15,owner: user._id,createdAt:'',}).save();
+    const wrong_password = '123wrongpassword123'; //wrong password
+    const DashBody = {dashboardId:dash._id , password:wrong_password};  //POST body
+    //Throw error
+    const Stub = sinon.stub(Dashboard, 'findOne').throws(new Error('Something went wrong!'));
+    //send POST request with authenticated user's token in query , wrong password and existing dashboard id in body
+    const {body} = await t.context.got.post(`dashboardsPassword/check-password?token=${token}`,{json:DashBody});
+    //check response
+    t.is(body.status,500);
+    t.is(body.message,'Something went wrong!');
+    //Restore sub
+    Stub.restore();
+  });
+
+    //test POST /share-dashboard returns status code 500 when error is thrown
+    test('POST /share-dashboard handles error correctly', async (t) => {
+      mongoose();
+      const token = jwtSign({id: user._id});
+    //Create test dashboard that is not being shared
+      dash = await Dashboard({name:'DashToCheckPassword',layout:[],items:{},nextId:6,password:'',shared:0,views:15,owner: user._id,createdAt:'',}).save();
+      const DashBody = {dashboardId:dash._id};  //POST body
+      //Throw error
+      const Stub = sinon.stub(Dashboard, 'findOne').throws(new Error('Something went wrong!'));
+      //send POST request with authenticated user's token in query , existing dashboard id in body
+      const {body} = await t.context.got.post(`dashboardsPassword/share-dashboard?token=${token}`,{json:DashBody});
+      //check response
+      t.is(body.status,500);
+      t.is(body.message,'Something went wrong!');
+      //Restore sub
+      Stub.restore();
+    });
+
+      //test POST /change-password returns status code 500 when error is thrown
+  test('POST /change-password handles error correctly', async (t) => {
+    mongoose();
+    const token = jwtSign({id: user._id});
+  //Create test dashboard
+   dash = await Dashboard({name: 'DashToClone',layout:[],items:{},nextId: 6,password: '',shared: 0,views: 15,owner: user._id,createdAt:'',
+                          }).save();
+    const new_password='123NewPassword' //new dashboard passwrod
+    const DashBody = {dashboardId:dash._id,password:new_password}; //POST body
+    //Throw error
+    const Stub = sinon.stub(Dashboard, 'findOne').throws(new Error('Something went wrong!'));
+    //send POST request with authenticated user's token in query , valid new password and dashboard id in body
+    const {body} = await t.context.got.post(`dashboardsPassword/change-password?token=${token}`,{json:DashBody});
+    //check response
+    t.is(body.status,500);
+    t.is(body.message,'Something went wrong!');
+    //Restore sub
+    Stub.restore();
   });

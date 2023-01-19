@@ -27,7 +27,7 @@ router.get('/sources',
     } 
     //error handling
     catch (err) {
-      return next(err.body);
+      return next(err);
     }
   });
 
@@ -55,7 +55,7 @@ router.post('/create-source',
     } 
     //error handling
     catch (err) {
-      return next(err.body);
+      return next(err);
     }
   }); 
 
@@ -97,7 +97,7 @@ router.post('/change-source',
     } 
     //error handling
     catch (err) {
-      return next(err.body);
+      return next(err);
     }
   }); 
 
@@ -121,7 +121,7 @@ router.post('/delete-source',
     } 
     //error handling
     catch (err) {
-      return next(err.body);
+      return next(err);
     }
   }); 
 
@@ -155,7 +155,7 @@ router.post('/source',
     } 
     //error handling
     catch (err) {
-      return next(err.body);
+      return next(err);
     }
   });
 
@@ -190,7 +190,7 @@ router.post('/check-sources',
     } 
     //error handling
     catch (err) {
-      return next(err.body);
+      return next(err);
     }
   });
 
