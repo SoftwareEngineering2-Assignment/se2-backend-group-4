@@ -69,7 +69,7 @@ async (req, res, next) => {
   } 
   //error handling
   catch (err) {
-    return next(err.body);
+    return next(err);
   }
 }); 
 
@@ -112,7 +112,7 @@ async (req, res, next) => {
   } 
   //error handling
   catch (err) {
-    return next(err.body);
+    return next(err);
   }
 }); 
 
@@ -143,7 +143,7 @@ async (req, res, next) => {
   } 
   //error handling
   catch (err) {
-    return next(err.body);
+    return next(err);
   }
 }); 
 
@@ -171,7 +171,7 @@ try {
 } 
 //error handling
 catch (err) {
-  return next(err.body);
+  return next(err);
 }
 }); 
 

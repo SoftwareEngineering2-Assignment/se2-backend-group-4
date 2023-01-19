@@ -374,7 +374,7 @@ test('POST /source handles error correctly ', async (t) => {
 });
 
 //test that POST /check-sources returns status code 500 when error is thrown
-test('POST sources/check-sources handles error correctly', async (t) => {
+test('POST sources/check-sources handles error correctlyhandles error correctly', async (t) => {
   mongoose();
   const token = jwtSign({id: user._id});
   const sourceBody={sources:[source1,source2,source3]} ; //POST body
@@ -382,7 +382,7 @@ test('POST sources/check-sources handles error correctly', async (t) => {
   const Stub = sinon.stub(Source, 'findOne').throws(new Error('Something went wrong!'));
   //send POST request with authenticated user's token in query , and id and name in body
   const {body} = await t.context.got.post(`sources/check-sources?token=${token}`,{json:sourceBody});
-  //t.is(body.status,500);
+  //Check response
   t.is(body.status,500);
   t.is(body.message,'Something went wrong!');
     

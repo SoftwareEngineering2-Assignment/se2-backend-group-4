@@ -3,6 +3,7 @@ require('dotenv').config();
 const {mongoose} = require('../src/config');
 const {jwtSign} = require('../src/utilities/authentication/helpers');
 const {http,test,got,listen,app,User,Dashboard,DeleteUsersAndDashboards} = require('../src/RouteImport');
+const sinon = require('sinon');
 
 test.before(async (t) => {
   t.context.server = http.createServer(app);
@@ -40,7 +41,6 @@ test('GET /dashboards returns correct response and status code', async (t) => {
     mongoose();
     const token = jwtSign({id: user._id});
     //create new dashboard for user with name=Dashname
-    //const dashboard1 =  await new Dashboard({name:'DashName',password:'password1'}).save();
     dashboard1 = await Dashboard({name: 'DashName',layout:[],items:{},nextId: 6,password: 'password1',shared: 0,views: 15,
                                     owner: user._id,createdAt:'',
     }).save();
@@ -200,3 +200,120 @@ test('POST /clone-dashboard returns correct response when dashboard with same na
   t.is(body.message, 'A dashboard with that name already exists.');
 });
 
+//test that GET /dashboards returns status code 500 when error is thrown
+test('GET /dashboards handles error correctly', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create 1 new test dashboard for the authenticated user
+  dash1 = await Dashboard({name: 'Dashboard1',layout:[],items:{},nextId: 1,password: '',shared: 0,views: 5,owner: user._id,createdAt:'',
+  }).save();
+  //Throw error
+  const Stub = sinon.stub(Dashboard, 'find').throws(new Error('Something went wrong!'));
+  //send GET request with authenticated user's token in query
+  const {body, statusCode} = await t.context.got(`dashboards/dashboards?token=${token}`);
+  //Check response
+  t.is(body.status,500);
+  t.is(body.message,'Something went wrong!');
+    
+  //Restore sub
+  Stub.restore();
+});
+
+//test that POST /create-dashboard returns status code 500 when error is thrown
+test('POST /create-dashboard handles error correctly', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //create new dashboard for user with name=Dashname
+  dashboard1 = await Dashboard({name: 'DashName',layout:[],items:{},nextId: 6,password: 'password1',shared: 0,views: 15,
+                                  owner: user._id,createdAt:'',}).save();
+  const new_name = 'DiffDashName' ;  //dashboard name different from the existing one
+  const dashBody = {name:new_name};
+  //Throw error
+  const Stub = sinon.stub(Dashboard, 'findOne').throws(new Error('Something went wrong!'));
+  //send POST request with authenticated user's token in query and new dashboard name in body
+  const {body} = await t.context.got.post(`dashboards/create-dashboard?token=${token}`,{json:dashBody});;
+  //Check response
+  t.is(body.status,500);
+  t.is(body.message,'Something went wrong!');
+    
+  //Restore sub
+  Stub.restore();
+})
+
+//test that POST /delete-dashboard returns status code 500 when error is thrown
+test('POST /delete-dashboard handles error correctly', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test dashboard
+  dash = await Dashboard({name: 'DashToDel',layout:[],items:{},nextId: 1,password: '',shared: 0,views: 5,owner: user._id,createdAt:'',}).save();
+  const id = {id:dash._id}; //id of dashboard created above
+  //Throw error
+  const Stub = sinon.stub(Dashboard, 'findOneAndRemove').throws(new Error('Something went wrong!'));
+  //send POST request with authenticated user's token in query and dashboard id in body
+  const {body} = await t.context.got.post(`dashboards/delete-dashboard?token=${token}`,{ json :id});
+  //check response
+  t.is(body.status,500);
+  t.is(body.message,'Something went wrong!');
+    
+  //Restore sub
+  Stub.restore();
+});
+
+//test that GET /dashboard returns status code 500 when error is thrown
+test('GET /dashboard handles error correctly', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test dashboard 
+  dash = await Dashboard({name: 'DashToGet',layout:[],items:{},nextId: 6,password: '',shared: 0,views: 15,owner: user._id,createdAt:'', }).save();
+  const id = dash._id; //id of dashboard created above
+  //Throw error
+  const Stub = sinon.stub(Dashboard, 'findOne').throws(new Error('Something went wrong!'));
+  //send GET request with authenticated user's token and dashboard's id in query
+  const {body} = await t.context.got(`dashboards/dashboard?token=${token}&id=${id}`);
+  //check response
+  t.is(body.status,500);
+  t.is(body.message,'Something went wrong!');
+    
+  //Restore sub
+  Stub.restore();
+});
+
+//test that POST /save-dashboard returns status code 500 when error is thrown
+test('POST /save-dashboard handles error correctly', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+  //Create test dashboard    
+  dash = await Dashboard({name: 'DashToSave',layout:[],items:{},nextId: 6,password: '',shared: 0,views: 15,owner: user._id,createdAt:'',}).save();
+  const id = {id:dash._id}; //id of dashboard created above
+  //Throw error
+  const Stub = sinon.stub(Dashboard, 'findOneAndUpdate').throws(new Error('Something went wrong!'));
+  //send POST request with authenticated user's token in query and dashboard id in body
+  const {body,statusCode} = await t.context.got.post(`dashboards/save-dashboard?token=${token}`,{ json :id});
+  //check response
+  t.is(body.status,500);
+  t.is(body.message,'Something went wrong!');
+    
+  //Restore sub
+  Stub.restore();
+});
+
+//test POST/clone-dashboard returns status code 500 when error is thrown
+test('POST /clone-dashboard handles error correctly', async (t) => {
+  mongoose();
+  const token = jwtSign({id: user._id});
+ //Create test dashboard 
+ dash = await Dashboard({name: 'DashToClone',layout:[],items:{},nextId: 6,password: '',shared: 0,views: 15,owner: user._id,createdAt:'',
+  }).save();
+  //Name of clone dashboard
+  const new_name='DashSuccessClone';
+  const DashBody = {dashboardId:dash._id, name:new_name}; //Body of new dashboard with new ,non existing name
+  //Throw error
+  const Stub = sinon.stub(Dashboard, 'findOne').throws(new Error('Something went wrong!'));
+ //send POST request with authenticated user's token in query and dashboard id and new_name in body
+  const {body} = await t.context.got.post(`dashboards/clone-dashboard?token=${token}`,{json:DashBody});
+  //check response
+  t.is(body.status,500);
+  t.is(body.message,'Something went wrong!');
+  //Restore sub
+  Stub.restore();
+});

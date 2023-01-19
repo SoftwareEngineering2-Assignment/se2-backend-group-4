@@ -28,7 +28,7 @@ router.get('/dashboards',
     } 
     //error handling
     catch (err) {
-      return next(err.body);
+      return next(err);
     }
   });
 
@@ -55,7 +55,7 @@ router.post('/create-dashboard',
     } 
     //error handling
     catch (err) {
-      return next(err.body);
+      return next(err);
     }
   }); 
 
@@ -79,7 +79,7 @@ router.post('/delete-dashboard',
     } 
     //error handling
     catch (err) {
-      return next(err.body);
+      return next(err);
     }
   }); 
 
@@ -121,7 +121,7 @@ router.get('/dashboard',
     } 
     //error handling
     catch (err) {
-      return next(err.body);
+      return next(err);
     }
   });
 
@@ -147,7 +147,7 @@ router.post('/save-dashboard',
     } 
     //error handling
     catch (err) {
-      return next(err.body);
+      return next(err);
     }
   }); 
 
@@ -176,7 +176,7 @@ router.post('/clone-dashboard',
     } 
     //error handling
     catch (err) {
-      return next(err.body);
+      return next(err);
     }
   }); 
 
