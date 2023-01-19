@@ -36,10 +36,9 @@ router.get('/statistics',
         views: totalViews,
         sources
       });
-    } 
-    //error hanndling
+    } //error hanndling
     catch (err) {
-      return next(err.body);
+      return next(err);
     }
   });
 
