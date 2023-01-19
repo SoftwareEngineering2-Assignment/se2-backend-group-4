@@ -374,7 +374,7 @@ test('POST /source handles error correctly ', async (t) => {
 });
 
 //test that POST /check-sources returns status code 500 when error is thrown
-test('POST sources/check-sources handles error correctlyhandles error correctly', async (t) => {
+test('POST sources/check-sources handles error correctly', async (t) => {
   mongoose();
   const token = jwtSign({id: user._id});
   const sourceBody={sources:[source1,source2,source3]} ; //POST body
