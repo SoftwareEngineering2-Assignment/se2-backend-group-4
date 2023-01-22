@@ -3,41 +3,53 @@ const {isNil} = require('ramda');
 const yup = require('yup');
 const {min} = require('./constants');
 
-//define email
+//Validator for email input
 const email = yup
   .string()
   .lowercase()
   .trim()
   .email();
 
-//define username
+//Validator for username input
 const username = yup
   .string()
   .trim();
 
-//define password
+//Validator for password input
 const password = yup
   .string()
   .trim()
   .min(min);
 
-//define request object
+/*
+* Validator for forgot password form
+* Checks for username input
+*/
 const request = yup.object().shape({username: username.required()});
 
-//define authenticate object
+/*
+* Validator for sign in form
+* Checks for username and password input
+*/
 const authenticate = yup.object().shape({
   username: username.required(),
   password: password.required()
 });
 
-//define register object
+/*
+* Validator for sign up form
+* Checks for username , password and email input
+*/
 const register = yup.object().shape({
   email: email.required(),
   password: password.required(),
   username: username.required()
 });
 
-//define update object
+/*
+* Validator for forgot update form
+* Checks for username and password input
+*/
 const update = yup.object().shape({
   username,
   password
@@ -46,7 +58,10 @@ const update = yup.object().shape({
   test: ({username: u, password: p}) => !(isNil(u) && isNil(p))
 });
 
-//define change object
+/*
+* Validator for change password form
+* Checks for password input
+*/
 const change = yup.object().shape({password: password.required()});
 
 //export functions
