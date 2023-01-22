@@ -1,8 +1,11 @@
+//File for all non external middlewares
 const path = require('path');
 require('dotenv').config({path: path.join(__dirname, '../', '.env')});
 const {error} = require('./middlewares');
 const routes = require('./routes');
 const {mongoose} = require('./config');
+
+//Import external middlewares and run express server
 const app = require('./app.useExternalMiddleware')
 const express = require('express');
 
