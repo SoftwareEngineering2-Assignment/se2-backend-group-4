@@ -1,14 +1,10 @@
 const path = require('path');
 require('dotenv').config({path: path.join(__dirname, '../', '.env')});
-const express = require('express');
 const {error} = require('./middlewares');
 const routes = require('./routes');
 const {mongoose} = require('./config');
-const appExternal = require('./app.useExternalMiddleware')
-const app = express();
-
-//Use external Middlewares
-app.use(appExternal);
+const app = require('./app.useExternalMiddleware')
+const express = require('express');
 
 // Mongo configuration
 mongoose();
